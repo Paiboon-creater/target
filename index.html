@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TARGET PROJECT // STOCK TERMINAL</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #041421;
+            --panel-bg: #082f49;
+            --border-cyan: #06b6d4;
+            --text-light-blue: #7dd3fc;
+            --text-cyan: #22d3ee;
+            --text-white: #f0f9ff;
+            --input-bg: #021a2c;
+            --table-bg: #f0fdfa;
+            --table-text-dark: #0f172a;
+            --table-th-bg: #ccfbf1;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light-blue);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px 0;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container { max-width: 950px; margin-top: 1rem; margin-bottom: 3rem; }
+
+        .terminal-header {
+            color: var(--text-cyan);
+            text-align: center;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            font-weight: bold;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-size: 1.5rem;
+        }
+
+        .card-stock {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-cyan);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.6);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label { color: var(--text-light-blue); font-weight: bold; font-size: 0.9rem; }
+        
+        .form-control-stock, .form-select-stock {
+            background-color: var(--input-bg);
+            border: 1px solid #0e7490;
+            color: var(--text-light-blue);
+            border-radius: 6px;
+            font-size: 1rem;
+            padding: 10px;
+        }
+        .form-control-stock:focus, .form-select-stock:focus {
+            background-color: var(--input-bg);
+            color: var(--text-white);
+            border-color: var(--text-cyan);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+            outline: none;
+        }
+
+        .btn-cyan { background-color: #0891b2; color: white; font-weight: bold; border: none; }
+        .btn-cyan:hover { background-color: #0e7490; color: white; }
+
+        /* ตารางสไตล์กระดานหุ้น ตัวหนังสือฟิลเตอร์สีฟ้าอ่อน และตัวหนังสือเข้มในตาราง */
+        .table-wrapper {
+            background-color: var(--table-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .filter-box { 
+            background-color: #082f49; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border: 1px dashed var(--border-cyan);
+            color: var(--text-light-blue);
+        }
+        
+        .stock-table { color: var(--table-text-dark); font-size: 0.85rem; }
+        .stock-table th { 
+            background-color: var(--table-th-bg); 
+            color: var(--table-text-dark); 
+            border-bottom: 2px solid #14b8a6; 
+            white-space: nowrap; 
+            font-weight: bold; 
+        }
+        .stock-table td { vertical-align: middle; border-color: #99f6e4; white-space: nowrap; color: var(--table-text-dark); }
+        .stock-table tbody tr:hover { background-color: #e2e8f0; }
+        
+        .btn-action { padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
+        .btn-edit { background-color: #f59e0b; color: white; border: none; margin-right: 4px; }
+        .btn-delete { background-color: #ef4444; color: white; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="terminal-header">📈 TARGET // STOCK TERMINAL</h2>
+    
+    <!-- ฟอร์มกรอกข้อมูล -->
+    <div class="card card-stock">
+        <form id="targetForm">
+            <input type="hidden" id="edit_id_target" value="">
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">⚙️ รหัสชิ้นงาน (Work Code - id_work)</label>
+                    <select id="id_work" class="form-select form-select-stock" required onchange="onFormWorkChange()">
+                        <option value="">-- เลือกรหัสชิ้นงาน --</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">🔧 ขั้นตอนการทำงาน (Step Name - id_step)</label>
+                    <select id="id_step" class="form-select form-select-stock" required>
+                        <option value="">-- เลือกขั้นตอนการทำงาน --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">📊 จำนวนเป้าหมาย (Target Amount)</label>
+                <input type="number" id="target_amount" class="form-control form-control-stock" placeholder="ระบุจำนวนเป้าหมาย..." required>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button type="button" class="btn btn-cyan w-100 py-2" id="btnSave" onclick="saveData()">[+] บันทึกข้อมูล (SAVE)</button>
+                <button type="button" class="btn btn-secondary w-25" id="btnCancelEdit" style="display:none;" onclick="cancelEdit()">ยกเลิก</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ส่วนแสดงตารางรายละเอียดข้อมูลด้านล่าง -->
+    <div id="tableSection">
+        <div class="table-wrapper">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h5 style="color: var(--table-text-dark); font-weight: bold; margin:0;">ตารางตรวจสอบข้อมูลเป้าหมาย (Targets Matrix)</h5>
+                <button class="btn btn-sm btn-primary fw-bold" onclick="loadTableData()">รีเฟรชข้อมูล</button>
+            </div>
+
+            <!-- ช่องกรองตามรหัสชิ้นงานแบบเรียลไทม์ (ตัวอักษรสีฟ้าอ่อน) -->
+            <div class="filter-box d-flex justify-content-between align-items-end flex-wrap gap-2">
+                <div style="flex: 1; min-width: 250px;">
+                    <label class="form-label mb-1" style="color: var(--text-light-blue); font-size:0.85rem;">🔍 กรองตรวจสอบตามรหัสชิ้นงาน (Realtime Filter)</label>
+                    <select id="filter_work" class="form-select form-select-stock" onchange="onFilterWorkChange()">
+                        <option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table stock-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID Target</th>
+                            <th>รหัสชิ้นงาน (Work Code)</th>
+                            <th>ขั้นตอนการทำงาน (Step Name)</th>
+                            <th>Target Amount</th>
+                            <th class="text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <tr><td colspan="5" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'https://siiiifesdjuunwmwozfb.supabase.co/rest/v1';
+    const SUPABASE_KEY = 'sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT';
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+
+    let refWorks = {};
+    let refSteps = {};
+    let tableData = []; 
+
+    window.onload = async function() {
+        Swal.fire({ title: 'เชื่อมต่อฐานข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        try {
+            // ดึงข้อมูลรหัสชิ้นงาน และขั้นตอนการทำงาน
+            const [worksRes, stepsRes] = await Promise.all([
+                fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json())
+            ]);
+
+            // เรียงลำดับ id_work จากน้อยไปมาก
+            worksRes.sort((a, b) => parseInt(a.id_work) - parseInt(b.id_work));
+
+            const selectWork = document.getElementById('id_work');
+            const filterWork = document.getElementById('filter_work');
+            const selectStep = document.getElementById('id_step');
+
+            selectWork.innerHTML = `<option value="">-- เลือกรหัสชิ้นงาน --</option>`;
+            filterWork.innerHTML = `<option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>`;
+            worksRes.forEach(w => {
+                refWorks[w.id_work] = w.work_code;
+                let optStr = `<option value="${w.id_work}">${w.work_code}</option>`;
+                selectWork.innerHTML += optStr;
+                filterWork.innerHTML += optStr;
+            });
+
+            selectStep.innerHTML = `<option value="">-- เลือกขั้นตอนการทำงาน --</option>`;
+            stepsRes.forEach(s => {
+                refSteps[s.id_step] = s.step_name;
+                selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
+            });
+
+            // โหลดข้อมูลตารางทั้งหมด
+            await loadTableData();
+
+            // ดึงค่าฟิลเตอร์ล่าสุดจาก localStorage เพื่อแสดงผลทันทีแม้ปิดแอปไปแล้ว (ประหยัดโควตาการอ่าน)
+            const savedFilterWork = localStorage.getItem('target_filter_work');
+            if (savedFilterWork) {
+                document.getElementById('filter_work').value = savedFilterWork;
+                document.getElementById('id_work').value = savedFilterWork;
+                renderTable();
+            }
+
+            Swal.close();
+        } catch (error) {
+            Swal.fire({icon: 'error', title: 'Error', text: 'เชื่อมต่อฐานข้อมูลล้มเหลว', background: '#082f49', color: 'white'});
+        }
+    };
+
+    // เมื่อเปลี่ยนค่า id_work ในฟอร์ม ให้นำค่าไปกรองตารางทันทีแบบเรียลไทม์ และบันทึกลง localStorage
+    function onFormWorkChange() {
+        const selectedWork = document.getElementById('id_work').value;
+        document.getElementById('filter_work').value = selectedWork;
+        localStorage.setItem('target_filter_work', selectedWork);
+        renderTable();
+    }
+
+    // เมื่อเปลี่ยนค่าที่ช่องฟิลเตอร์ด้านล่าง ให้ซิงค์กลับมาที่ฟอร์มด้านบนด้วย
+    function onFilterWorkChange() {
+        const selectedFilter = document.getElementById('filter_work').value;
+        document.getElementById('id_work').value = selectedFilter;
+        localStorage.setItem('target_filter_work', selectedFilter);
+        renderTable();
+    }
+
+    // บันทึกข้อมูลลงตาราง targets (รองรับทั้ง Create และ Update)
+    async function saveData() {
+        const editIdTarget = document.getElementById('edit_id_target').value;
+        const id_work = document.getElementById('id_work').value;
+        const id_step = document.getElementById('id_step').value;
+        const target_amount = document.getElementById('target_amount').value;
+
+        if (!id_work || !id_step || !target_amount) {
+            Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกข้อมูลให้ครบถ้วน', background: '#082f49', color: 'white'}); 
+            return;
+        }
+
+        const payload = {
+            id_work: parseInt(id_work),
+            id_step: parseInt(id_step),
+            target_amount: parseFloat(target_amount)
+        };
+
+        document.getElementById('btnSave').disabled = true;
+
+        try {
+            let res;
+            if (!editIdTarget) {
+                res = await fetch(`${BASE_URL}/targets`, {
+                    method: 'POST', 
+                    headers: { ...headers, 'Prefer': 'return=minimal' }, 
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch(`${BASE_URL}/targets?id_target=eq.${editIdTarget}`, {
+                    method: 'PATCH', 
+                    headers: { ...headers, 'Prefer': 'return=minimal' }, 
+                    body: JSON.stringify(payload)
+                });
+                cancelEdit();
+            }
+
+            if (!res.ok) throw new Error('Transaction Failed');
+
+            Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
+            
+            document.getElementById('targetForm').reset();
+
+            // อัปเดตตารางและกรองตามรหัสชิ้นงานปัจจุบันทันที
+            document.getElementById('filter_work').value = id_work;
+            localStorage.setItem('target_filter_work', id_work);
+            await loadTableDataRaw();
+            renderTable();
+
+        } catch (e) {
+            Swal.fire({icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', background: '#082f49', color: 'white'});
+        } finally {
+            document.getElementById('btnSave').disabled = false;
+        }
+    }
+
+    async function loadTableDataRaw() {
+        const res = await fetch(`${BASE_URL}/targets?select=*&order=id_target.desc`, { headers });
+        tableData = await res.json();
+    }
+
+    async function loadTableData() {
+        try {
+            await loadTableDataRaw();
+            renderTable();
+        } catch(e) {
+            Swal.fire({icon: 'error', title: 'Error', text: 'ดึงข้อมูลไม่สำเร็จ', background: '#082f49', color: 'white'});
+        }
+    }
+
+    // เรนเดอร์ตารางและกรองข้อมูลแบบเรียลไทม์
+    function renderTable() {
+        const filterVal = document.getElementById('filter_work').value;
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = '';
+
+        let filtered = tableData;
+        if (filterVal) {
+            filtered = tableData.filter(row => row.id_work == filterVal);
+        }
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary">ไม่พบข้อมูลขั้นตอนสำหรับรหัสชิ้นงานนี้ (ยังไม่ได้ระบุขั้นตอนการทำงาน)</td></tr>';
+            return;
+        }
+
+        filtered.forEach(row => {
+            let workCode = refWorks[row.id_work] ? refWorks[row.id_work] : `ID: ${row.id_work}`;
+            let stepName = refSteps[row.id_step] ? refSteps[row.id_step] : `ID: ${row.id_step}`;
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="fw-bold text-center">#${row.id_target}</td>
+                <td style="color: #0369a1; font-weight: bold;">${workCode}</td>
+                <td style="color: #0f766e;">${stepName}</td>
+                <td class="fw-bold" style="color: #047857;">${row.target_amount}</td>
+                <td class="text-center">
+                    <button class="btn-action btn-edit" onclick="verifyPin(() => triggerEdit(${row.id_target}, ${row.id_work}, ${row.id_step}, ${row.target_amount}))">แก้ไข</button>
+                    <button class="btn-action btn-delete" onclick="verifyPin(() => deleteRecord(${row.id_target}))">ลบ</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ระบบถามรหัสผ่าน 112233 ก่อนแก้ไขหรือลบ
+    async function verifyPin(actionCallback) {
+        const { value: pin } = await Swal.fire({
+            title: '🔒 ยืนยันตัวตน',
+            text: 'กรุณาใส่รหัสผ่านเพื่อดำเนินการ (112233)',
+            input: 'password',
+            inputAttributes: { autocapitalize: 'off' },
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก',
+            background: '#041421', color: '#7dd3fc',
+            customClass: { confirmButton: 'btn btn-cyan', cancelButton: 'btn btn-secondary' }
+        });
+
+        if (pin === '112233') {
+            actionCallback();
+        } else if (pin !== undefined) {
+            Swal.fire({ icon: 'error', title: 'รหัสไม่ถูกต้อง', text: 'คุณไม่มีสิทธิ์ทำรายการนี้', background: '#041421', color: '#fb7185' });
+        }
+    }
+
+    function triggerEdit(id_target, id_work, id_step, target_amount) {
+        document.getElementById('edit_id_target').value = id_target;
+        document.getElementById('id_work').value = id_work;
+        onFormWorkChange();
+        document.getElementById('id_step').value = id_step;
+        document.getElementById('target_amount').value = target_amount;
+        
+        document.getElementById('btnSave').innerText = '[*] บันทึกการแก้ไข (UPDATE)';
+        document.getElementById('btnSave').classList.replace('btn-cyan', 'btn-warning');
+        document.getElementById('btnCancelEdit').style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        document.getElementById('targetForm').reset();
+        document.getElementById('edit_id_target').value = '';
+        
+        document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
+        document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
+        document.getElementById('btnCancelEdit').style.display = 'none';
+        onFormWorkChange();
+    }
+
+    async function deleteRecord(id_target) {
+        const confirmDelete = await Swal.fire({
+            title: 'ยืนยันการลบ?',
+            text: "ข้อมูล Target ID #" + id_target + " จะถูกลบออกจากระบบอย่างถาวร!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ลบทิ้ง',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#ef4444',
+            background: '#041421', color: '#7dd3fc'
+        });
+
+        if (confirmDelete.isConfirmed) {
+            try {
+                const res = await fetch(`${BASE_URL}/targets?id_target=eq.${id_target}`, {
+                    method: 'DELETE', headers: headers
+                });
+                if (res.ok) {
+                    Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
+                    await loadTableDataRaw();
+                    renderTable();
+                } else {
+                    throw new Error('Delete Failed');
+                }
+            } catch (e) {
+                Swal.fire({icon: 'error', title: 'Error', text: 'ลบข้อมูลไม่สำเร็จ', background: '#041421', color: '#7dd3fc'});
+            }
+        }
+    }
+</script>
+</body>
+</html>
