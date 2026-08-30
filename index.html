@@ -31,7 +31,7 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        .container { max-width: 950px; margin-top: 1rem; margin-bottom: 3rem; }
+        .container { max-width: 950px; margin-top: 1rem; margin-bottom: 3rem; position: relative; }
 
         .terminal-header {
             color: var(--text-cyan);
@@ -41,6 +41,43 @@
             margin-bottom: 20px;
             letter-spacing: 1px;
             font-size: 1.5rem;
+        }
+
+        /* ปุ่ม Home App สไตล์ Terminal */
+        .home-btn {
+            position: absolute;
+            top: 0;
+            right: 15px;
+            background-color: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--border-cyan);
+            color: var(--text-cyan);
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .home-btn:hover {
+            background-color: var(--text-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+        }
+
+        /* ปรับปุ่มให้อยู่ตรงกลางเวลาดูบนมือถือ */
+        @media (max-width: 768px) {
+            .home-btn {
+                position: static;
+                display: inline-flex;
+                margin-bottom: 15px;
+            }
+            .header-wrapper {
+                text-align: center;
+            }
         }
 
         .card-stock {
@@ -107,7 +144,12 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container header-wrapper">
+    <!-- ปุ่ม Home App -->
+    <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="home-btn">
+        🏠 Home App
+    </a>
+
     <h2 class="terminal-header">📈 TARGET // STOCK TERMINAL</h2>
     
     <!-- ฟอร์มกรอกข้อมูล -->
