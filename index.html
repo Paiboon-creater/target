@@ -594,7 +594,7 @@
         onFormWorkChange();
     }
 
-    async function deleteRecord(id_target) {
+   async function deleteRecord(id_target) {
         const confirmDelete = await Swal.fire({
             title: 'ยืนยันการลบ?',
             text: "ข้อมูล Target ID #" + id_target + " จะถูกลบออกจากระบบอย่างถาวร!",
@@ -611,15 +611,36 @@
                 const res = await fetch(`${BASE_URL}/targets?id_target=eq.${id_target}`, {
                     method: 'DELETE', headers: headers
                 });
+                
                 if (res.ok) {
                     Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
                     await loadTableDataRaw();
                     renderTable();
                 } else {
-                    throw new Error('Delete Failed');
+                    // ดึงข้อความ Error จากฐานข้อมูล
+                    const errData = await res.json().catch(() => ({}));
+                    
+                    // ดักจับ Error 409 (ติด Foreign Key)
+                    if (res.status === 409) {
+                        Swal.fire({
+                            icon: 'error', 
+                            title: 'ลบข้อมูลไม่ได้!', 
+                            text: 'เป้าหมายนี้มีการบันทึกยอดผลิตไปแล้ว (ติดประวัติการทำงาน) กรุณาลบประวัติในหน้าบันทึกการผลิตก่อนครับ', 
+                            background: '#041421', 
+                            color: '#fb7185'
+                        });
+                    } else {
+                        throw new Error(errData.message || 'Delete Failed');
+                    }
                 }
             } catch (e) {
-                Swal.fire({icon: 'error', title: 'Error', text: 'ลบข้อมูลไม่สำเร็จ', background: '#041421', color: '#7dd3fc'});
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'ข้อผิดพลาด', 
+                    text: 'ลบข้อมูลไม่สำเร็จ: ' + e.message, 
+                    background: '#041421', 
+                    color: '#fb7185'
+                });
             }
         }
     }
