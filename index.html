@@ -432,23 +432,31 @@
     // ตัวแปรสำหรับเก็บ Instance ของ Tom Select
     let tsIdWork, tsFilterWork;
 
-    // การตั้งค่าให้ Tom Select ถมดำข้อความทันทีที่คลิก เพื่อพิมพ์ทับได้ และแสดงรายการทั้งหมด
+    // การตั้งค่าให้ Tom Select ถมดำข้อความทันทีที่คลิก โฟกัสไปที่ตัวล่าสุด
     const tomSelectConfig = {
         create: false,
         sortField: false,
         maxOptions: null, // <--- แสดงรายการทั้งหมดโดยไม่จำกัดจำนวน
+        onChange: function(value) {
+            // อัปเดตเก็บค่าตัวที่เลือกล่าสุดทุกครั้งที่มีการเปลี่ยนค่า
+            if (value) {
+                this.lastValue = value;
+            }
+        },
         onFocus: function() {
+            // ถ้ามี items หลุดจากการ clear เดิม ก็จำค่าไว้
             if (this.items.length > 0) {
                 this.lastValue = this.items[0]; 
+            }
+            // เริ่มต้นคลุมดำข้อความ
+            if (this.lastValue) {
                 let currentText = this.options[this.lastValue].text;
                 this.clear(true); 
                 this.setTextboxValue(currentText); 
                 setTimeout(() => { 
                     this.control_input.select(); 
-                    try { this.control_input.setSelectionRange(0, 9999); } catch(e){} // เผื่อสำหรับบางเบราว์เซอร์
+                    try { this.control_input.setSelectionRange(0, 9999); } catch(e){} 
                 }, 50);
-            } else {
-                this.lastValue = null;
             }
         },
         onBlur: function() {
@@ -457,12 +465,22 @@
                 let match = Object.values(this.options).find(o => o.text === typedText);
                 if (match) {
                     this.setValue(match.value, true);
+                    this.lastValue = match.value;
                 } else if (this.lastValue) {
                     // หากพิมพ์ผิดแล้วคลิกออก ให้ดึงค่าเก่ากลับมา
                     this.setValue(this.lastValue, true);
                 }
             }
             this.setTextboxValue(''); 
+        },
+        onDropdownOpen: function() {
+            // เมื่อกล่องรายการถูกเปิด ให้ไปไฮไลต์ (โฟกัส) ที่รายการเลือกล่าสุด
+            if (this.lastValue) {
+                let optEl = this.getOption(this.lastValue);
+                if (optEl) {
+                    this.setActiveOption(optEl);
+                }
+            }
         }
     };
 
@@ -501,7 +519,7 @@
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
-            // เปิดใช้งาน Tom Select พร้อมฟังก์ชันถมดำ
+            // เปิดใช้งาน Tom Select พร้อมฟังก์ชันถมดำและโฟกัสตัวล่าสุด
             tsIdWork = new TomSelect('#id_work', tomSelectConfig);
             tsFilterWork = new TomSelect('#filter_work', tomSelectConfig);
 
