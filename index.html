@@ -1,1535 +1,826 @@
 <!DOCTYPE html>
-
 <html lang="th">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
     <title>TARGET PROJECT // STOCK TERMINAL</title>
-
     <!-- Bootstrap 5 CSS -->
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- SweetAlert2 -->
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     
-
+    <!-- Tom Select CSS (สำหรับ Dropdown ค้นหาได้) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    
     <style>
-
         :root {
-
             --bg-dark: #041421;
-
             --panel-bg: #082f49;
-
             --border-cyan: #06b6d4;
-
             --text-light-blue: #7dd3fc;
-
             --text-cyan: #22d3ee;
-
             --text-white: #f0f9ff;
-
             --input-bg: #021a2c;
-
             --table-bg: #f0fdfa;
-
             --table-text-dark: #0f172a;
-
             --table-th-bg: #ccfbf1;
-
         }
-
-
 
         body {
-
             background-color: var(--bg-dark);
-
             color: var(--text-light-blue);
-
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
             padding: 20px 0;
-
             -webkit-text-size-adjust: 100%;
-
             transition: padding-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-
         }
-
-
 
         /* คลาสสำหรับขยับหน้าจอหลักหลบคู่มือด้านซ้าย */
-
         @media (min-width: 1024px) {
-
             body.manual-open {
-
                 padding-left: 360px;
-
             }
-
         }
-
-
 
         .container { 
-
             max-width: 950px; 
-
             margin: 0 auto;
-
             position: relative; 
-
         }
-
-
 
         .terminal-header {
-
             color: var(--text-cyan);
-
             text-align: center;
-
             text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-
             font-weight: bold;
-
             margin-bottom: 20px;
-
             letter-spacing: 1px;
-
             font-size: 1.5rem;
-
         }
-
-
 
         .top-buttons {
-
             position: absolute;
-
             top: -5px;
-
             right: 0;
-
             display: flex;
-
             gap: 10px;
-
             z-index: 10;
-
         }
-
-
 
         .header-btn {
-
             background-color: rgba(6, 182, 212, 0.1);
-
             border: 1px solid var(--border-cyan);
-
             color: var(--text-cyan);
-
             padding: 6px 16px;
-
             border-radius: 6px;
-
             font-weight: bold;
-
             font-size: 0.9rem;
-
             text-decoration: none;
-
             display: flex;
-
             align-items: center;
-
             gap: 8px;
-
             transition: all 0.3s ease;
-
             cursor: pointer;
-
         }
-
         
-
         .header-btn:hover {
-
             background-color: var(--text-cyan);
-
             color: var(--bg-dark);
-
             box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
-
         }
-
-
 
         @media (max-width: 768px) {
-
             .top-buttons {
-
                 position: static;
-
                 justify-content: center;
-
                 margin-bottom: 20px;
-
                 margin-top: 10px;
-
             }
-
             .header-wrapper {
-
                 text-align: center;
-
             }
-
             .terminal-header { margin-top: 10px; }
-
         }
-
-
 
         .card-stock {
-
             background-color: var(--panel-bg);
-
             border: 1px solid var(--border-cyan);
-
             border-radius: 12px;
-
             padding: 1.25rem;
-
             box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.6);
-
             margin-bottom: 1.5rem;
-
         }
-
-
 
         .form-label { color: var(--text-light-blue); font-weight: bold; font-size: 0.9rem; }
-
         
-
         .form-control-stock, .form-select-stock {
-
             background-color: var(--input-bg);
-
             border: 1px solid #0e7490;
-
             color: var(--text-light-blue);
-
             border-radius: 6px;
-
             font-size: 1rem;
-
             padding: 10px;
-
         }
-
         .form-control-stock:focus, .form-select-stock:focus {
-
             background-color: var(--input-bg);
-
             color: var(--text-white);
-
             border-color: var(--text-cyan);
-
             box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
-
             outline: none;
-
         }
 
-
+        /* Tom Select Dark Theme Overrides */
+        .ts-control {
+            background-color: var(--input-bg) !important;
+            border: 1px solid #0e7490 !important;
+            color: var(--text-light-blue) !important;
+            border-radius: 6px !important;
+            padding: 10px 12px !important;
+        }
+        .ts-control.focus {
+            border-color: var(--text-cyan) !important;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.5) !important;
+        }
+        .ts-control > input {
+            color: var(--text-white) !important;
+        }
+        .ts-dropdown {
+            background-color: var(--panel-bg) !important;
+            border: 1px solid var(--border-cyan) !important;
+            color: var(--text-light-blue) !important;
+            border-radius: 0 0 6px 6px !important;
+        }
+        .ts-dropdown .option {
+            padding: 8px 12px !important;
+        }
+        .ts-dropdown .option:hover, .ts-dropdown .option.active {
+            background-color: #0e7490 !important;
+            color: var(--text-white) !important;
+        }
+        .ts-control .item {
+            color: var(--text-light-blue) !important;
+        }
 
         .btn-cyan { background-color: #0891b2; color: white; font-weight: bold; border: none; }
-
         .btn-cyan:hover { background-color: #0e7490; color: white; }
 
-
-
         .table-wrapper {
-
             background-color: var(--table-bg);
-
             border-radius: 12px;
-
             padding: 15px;
-
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
-
         }
-
         .filter-box { 
-
             background-color: #082f49; 
-
             padding: 12px; 
-
             border-radius: 8px; 
-
             margin-bottom: 15px; 
-
             border: 1px dashed var(--border-cyan);
-
             color: var(--text-light-blue);
-
         }
-
         
-
         .stock-table { color: var(--table-text-dark); font-size: 0.85rem; }
-
         .stock-table th { 
-
             background-color: var(--table-th-bg); 
-
             color: var(--table-text-dark); 
-
             border-bottom: 2px solid #14b8a6; 
-
             white-space: nowrap; 
-
             font-weight: bold; 
-
         }
-
         .stock-table td { vertical-align: middle; border-color: #99f6e4; white-space: nowrap; color: var(--table-text-dark); }
-
         .stock-table tbody tr:hover { background-color: #e2e8f0; }
-
         
-
         .btn-action { padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
-
         .btn-edit { background-color: #f59e0b; color: white; border: none; margin-right: 4px; }
-
         .btn-delete { background-color: #ef4444; color: white; border: none; }
 
-
-
         /* ==============================================
-
            CSS สำหรับหน้าต่างคู่มือแบบลอยจัดด้านซ้าย
-
         =============================================== */
-
         .floating-window {
-
             position: fixed;
-
             top: 15px;
-
             left: 15px;
-
             width: 340px;
-
             height: calc(100vh - 30px);
-
             min-width: 280px; 
-
             min-height: 300px;
-
             background-color: var(--panel-bg);
-
             border: 2px solid var(--border-cyan);
-
             border-radius: 10px;
-
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(6, 182, 212, 0.3);
-
             z-index: 9999;
-
             flex-direction: column;
-
             overflow: hidden;
-
             resize: both;
-
             display: none; 
-
             transition: opacity 0.3s ease;
-
         }
-
         
-
         .floating-header {
-
             background-color: #0e7490;
-
             color: var(--text-cyan);
-
             padding: 12px 15px;
-
             font-weight: bold;
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             cursor: grab;
-
             border-bottom: 1px solid var(--border-cyan);
-
             user-select: none;
-
             flex-shrink: 0;
-
             font-size: 1rem;
-
         }
-
         
-
         .floating-header:active {
-
             cursor: grabbing;
-
         }
-
-
 
         .floating-body {
-
             padding: 15px;
-
             overflow-y: auto;
-
             color: var(--text-white);
-
             font-size: 0.9rem;
-
             line-height: 1.7;
-
             flex-grow: 1;
-
         }
-
-
 
         .floating-body::-webkit-scrollbar { width: 8px; }
-
         .floating-body::-webkit-scrollbar-track { background: #021a2c; }
-
         .floating-body::-webkit-scrollbar-thumb { background-color: #0e7490; border-radius: 10px; }
-
         .floating-body::-webkit-scrollbar-thumb:hover { background-color: #06b6d4; }
 
-
-
         .floating-footer {
-
             padding: 10px 15px;
-
             padding-right: 25px;
-
             border-top: 1px solid var(--border-cyan);
-
             background-color: #041421;
-
             display: flex;
-
             justify-content: space-between;
-
             flex-shrink: 0;
-
         }
-
-
 
         .manual-section-title {
-
             font-weight: bold;
-
             margin-top: 20px;
-
             border-bottom: 1px dashed;
-
             padding-bottom: 5px;
-
             margin-bottom: 10px;
-
         }
-
         .manual-section-title:first-child { margin-top: 0; }
 
-
-
         .floating-body ul, .floating-body ol { padding-left: 20px; margin-bottom: 15px; }
-
         .floating-body li { margin-bottom: 6px; }
 
-
-
         @media (max-width: 1024px) {
-
             .floating-window { 
-
                 width: 90%; 
-
                 left: 5%; 
-
                 top: 5%; 
-
                 height: 85vh; 
-
             }
-
         }
-
     </style>
-
 </head>
-
 <body>
 
-
-
 <div class="container header-wrapper">
-
     <!-- กลุ่มปุ่มบนขวา -->
-
     <div class="top-buttons">
-
         <button type="button" class="header-btn" onclick="openManual()">
-
             📖 คู่มือ
-
         </button>
-
         <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="header-btn">
-
             🏠 Home App
-
         </a>
-
     </div>
-
-
 
     <h2 class="terminal-header">📈 TARGET // STOCK TERMINAL</h2>
-
     
-
     <!-- ฟอร์มกรอกข้อมูล -->
-
     <div class="card card-stock">
-
         <form id="targetForm">
-
             <input type="hidden" id="edit_id_target" value="">
-
             
-
             <div class="row">
-
                 <div class="col-md-6 mb-3">
-
                     <label class="form-label">⚙️ รหัสชิ้นงาน (Work Code - id_work)</label>
-
                     <select id="id_work" class="form-select form-select-stock" required onchange="onFormWorkChange()">
-
                         <option value="">-- เลือกรหัสชิ้นงาน --</option>
-
                     </select>
-
                 </div>
-
                 <div class="col-md-6 mb-3">
-
                     <label class="form-label">🔧 ขั้นตอนการทำงาน (Step Name - id_step)</label>
-
                     <select id="id_step" class="form-select form-select-stock" required>
-
                         <option value="">-- เลือกขั้นตอนการทำงาน --</option>
-
                     </select>
-
                 </div>
-
             </div>
-
-
 
             <div class="mb-3">
-
                 <label class="form-label">📊 จำนวนเป้าหมาย (Target Amount)</label>
-
                 <input type="number" id="target_amount" class="form-control form-control-stock" placeholder="ระบุจำนวนเป้าหมาย..." required>
-
             </div>
-
-
 
             <div class="d-flex gap-2 mt-2">
-
                 <button type="button" class="btn btn-cyan w-100 py-2" id="btnSave" onclick="saveData()">[+] บันทึกข้อมูล (SAVE)</button>
-
                 <button type="button" class="btn btn-secondary w-25" id="btnCancelEdit" style="display:none;" onclick="cancelEdit()">ยกเลิก</button>
-
             </div>
-
         </form>
-
     </div>
-
-
 
     <!-- ส่วนแสดงตารางรายละเอียดข้อมูลด้านล่าง -->
-
     <div id="tableSection">
-
         <div class="table-wrapper">
-
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
                 <h5 style="color: var(--table-text-dark); font-weight: bold; margin:0;">ตารางตรวจสอบข้อมูลเป้าหมาย (Targets Matrix)</h5>
-
                 <button class="btn btn-sm btn-primary fw-bold" onclick="loadTableData()">รีเฟรชข้อมูล</button>
-
             </div>
-
-
 
             <div class="filter-box d-flex justify-content-between align-items-end flex-wrap gap-2">
-
                 <div style="flex: 1; min-width: 250px;">
-
                     <label class="form-label mb-1" style="color: var(--text-light-blue); font-size:0.85rem;">🔍 กรองตรวจสอบตามรหัสชิ้นงาน (Realtime Filter)</label>
-
                     <select id="filter_work" class="form-select form-select-stock" onchange="onFilterWorkChange()">
-
                         <option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>
-
                     </select>
-
                 </div>
-
             </div>
-
-
 
             <div class="table-responsive">
-
                 <table class="table stock-table align-middle">
-
                     <thead>
-
                         <tr>
-
                             <th>ID Target</th>
-
                             <th>รหัสชิ้นงาน (Work Code)</th>
-
                             <th>ขั้นตอนการทำงาน (Step Name)</th>
-
                             <th>Target Amount</th>
-
                             <th class="text-center">จัดการ</th>
-
                         </tr>
-
                     </thead>
-
                     <tbody id="dataTableBody">
-
                         <tr><td colspan="5" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr>
-
                     </tbody>
-
                 </table>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
-
 
 <!-- ==============================================
-
      หน้าต่างคู่มือแบบลอย (วางซ้ายมือ ลากย่อขยายได้)
-
 =============================================== -->
-
 <div id="floatingManual" class="floating-window">
-
     <div class="floating-header" id="floatingManualHeader">
-
         <span style="font-size: 0.95rem;">📖 คู่มือการใช้งาน (ลาก/ย่อขยายได้)</span>
-
         <button type="button" class="btn-close btn-close-white" style="font-size: 0.75rem;" onclick="closeManual()"></button>
-
     </div>
-
     
-
     <div class="floating-body" id="manualContent">
-
         <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">📝 การเพิ่มข้อมูลเป้าหมายใหม่</div>
-
         <ol>
-
-            <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ</li>
-
+            <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ (พิมพ์ค้นหาได้)</li>
             <li>ที่ช่อง <strong>ขั้นตอนการทำงาน</strong> ให้เลือกขั้นตอนการผลิต กรณีไม่พบ ขั้นตอนที่ต้องการกรุณาติดต่อผู้สร้างระบบฐานข้อมูล</li>
-
             <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย(ชิ้น/ต่อคน/ต่อชม.)</li>
-
             <li>กดปุ่ม <strong style="color: #22d3ee;">[+] บันทึกข้อมูล (SAVE)</strong></li>
-
         </ol>
-
-
 
         <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">🔍 การกรองข้อมูล</div>
-
         <ul>
-
             <li>ตารางด้านล่างมีช่อง <strong>กรองตรวจสอบตามรหัสชิ้นงาน</strong></li>
-
             <li>เมื่อเปลี่ยนรหัสชิ้นงาน ตารางจะแสดงเฉพาะข้อมูลของชิ้นงานนั้นๆ ทันที</li>
-
         </ul>
 
-
-
         <div class="manual-section-title" style="color: #f59e0b; border-color: #f59e0b;">✏️ การแก้ไขข้อมูล</div>
-
         <ol>
-
             <li>กดปุ่ม <span style="background-color:#f59e0b; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">แก้ไข</span> ในตาราง</li>
-
             <li>กรอกรหัสผ่าน <strong>เพื่อยืนยันตัวตน</strong></li>
-
             <li>แก้ไขจำนวนที่ฟอร์มด้านบน และกด <br><strong style="color: #f59e0b;">[*] บันทึกการแก้ไข</strong></li>
-
         </ol>
-
-
 
         <div class="manual-section-title" style="color: #ef4444; border-color: #ef4444;">🗑️ การลบข้อมูล</div>
-
         <ol>
-
             <li>กดปุ่ม <span style="background-color:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">ลบ</span> ในตาราง</li>
-
             <li>กรอกรหัสผ่าน <strong>เพื่อยืนยันตัวตน</strong> แล้วกดยืนยัน</li>
-
         </ol>
-
     </div>
-
     
-
     <div class="floating-footer">
-
         <button type="button" class="btn btn-primary fw-bold btn-sm" onclick="printManual()" style="background-color: #0ea5e9; border:none;">🖨️ พิมพ์คู่มือ</button>
-
         <button type="button" class="btn btn-secondary fw-bold btn-sm" onclick="closeManual()" style="background-color: #475569; border:none;">ปิด</button>
-
     </div>
-
 </div>
 
-
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-
     const BASE_URL = 'https://siiiifesdjuunwmwozfb.supabase.co/rest/v1';
-
     const SUPABASE_KEY = 'sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT';
-
     const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
 
-
-
     let refWorks = {};
-
     let refSteps = {};
-
     let tableData = []; 
-
-
+    
+    // ตัวแปรสำหรับเก็บ Instance ของ Tom Select
+    let tsIdWork, tsFilterWork;
 
     window.onload = async function() {
-
         // จัดการเปิดคู่มืออัตโนมัติหากหน้าจอใหญ่ (Desktop)
-
         if(window.innerWidth > 1024) {
-
             openManual();
-
         }
-
-
 
         Swal.fire({ title: 'เชื่อมต่อฐานข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
-
-
         try {
-
             const [worksRes, stepsRes] = await Promise.all([
-
                 fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
-
                 fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json())
-
             ]);
 
-
-
-            worksRes.sort((a, b) => parseInt(a.id_work) - parseInt(b.id_work));
-
-
+            // เรียงลำดับ Work Code จากน้อยไปมาก อิงตามตัวอักษรและตัวเลข
+            worksRes.sort((a, b) => {
+                let codeA = String(a.work_code || '');
+                let codeB = String(b.work_code || '');
+                return codeA.localeCompare(codeB, 'th', { numeric: true });
+            });
 
             const selectWork = document.getElementById('id_work');
-
             const filterWork = document.getElementById('filter_work');
-
             const selectStep = document.getElementById('id_step');
 
-
-
             selectWork.innerHTML = `<option value="">-- เลือกรหัสชิ้นงาน --</option>`;
-
             filterWork.innerHTML = `<option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>`;
-
             worksRes.forEach(w => {
-
                 refWorks[w.id_work] = w.work_code;
-
                 let optStr = `<option value="${w.id_work}">${w.work_code}</option>`;
-
                 selectWork.innerHTML += optStr;
-
                 filterWork.innerHTML += optStr;
-
             });
-
-
 
             selectStep.innerHTML = `<option value="">-- เลือกขั้นตอนการทำงาน --</option>`;
-
             stepsRes.forEach(s => {
-
                 refSteps[s.id_step] = s.step_name;
-
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
-
             });
 
-
+            // เปิดใช้งาน Tom Select สำหรับการค้นหา
+            tsIdWork = new TomSelect('#id_work', {
+                create: false,
+                sortField: false // ไม่ต้องให้มันเรียงซ้ำ เพราะเราเรียงมาจาก Array แล้ว
+            });
+            tsFilterWork = new TomSelect('#filter_work', {
+                create: false,
+                sortField: false
+            });
 
             await loadTableData();
 
-
-
             const savedFilterWork = localStorage.getItem('target_filter_work');
-
             if (savedFilterWork) {
-
-                document.getElementById('filter_work').value = savedFilterWork;
-
-                document.getElementById('id_work').value = savedFilterWork;
-
+                tsFilterWork.setValue(savedFilterWork, true);
+                tsIdWork.setValue(savedFilterWork, true);
                 renderTable();
-
             }
 
-
-
             Swal.close();
-
         } catch (error) {
-
             Swal.fire({icon: 'error', title: 'Error', text: 'เชื่อมต่อฐานข้อมูลล้มเหลว', background: '#082f49', color: 'white'});
-
         }
-
     };
 
-
-
     function onFormWorkChange() {
-
         const selectedWork = document.getElementById('id_work').value;
-
-        document.getElementById('filter_work').value = selectedWork;
-
+        tsFilterWork.setValue(selectedWork, true); // true = อัปเดตแบบเงียบๆ ไม่ให้เกิด Event วนลูป
         localStorage.setItem('target_filter_work', selectedWork);
-
         renderTable();
-
     }
-
-
 
     function onFilterWorkChange() {
-
         const selectedFilter = document.getElementById('filter_work').value;
-
-        document.getElementById('id_work').value = selectedFilter;
-
+        tsIdWork.setValue(selectedFilter, true);
         localStorage.setItem('target_filter_work', selectedFilter);
-
         renderTable();
-
     }
 
-
-
     async function saveData() {
-
         const editIdTarget = document.getElementById('edit_id_target').value;
-
         const id_work = document.getElementById('id_work').value;
-
         const id_step = document.getElementById('id_step').value;
-
         const target_amount = document.getElementById('target_amount').value;
 
-
-
         if (!id_work || !id_step || !target_amount) {
-
             Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกข้อมูลให้ครบถ้วน', background: '#082f49', color: 'white'}); 
-
             return;
-
         }
 
-
-
         const payload = {
-
             id_work: parseInt(id_work),
-
             id_step: parseInt(id_step),
-
             target_amount: parseFloat(target_amount)
-
         };
-
-
 
         document.getElementById('btnSave').disabled = true;
 
-
-
         try {
-
             let res;
-
             if (!editIdTarget) {
-
                 res = await fetch(`${BASE_URL}/targets`, {
-
                     method: 'POST', 
-
                     headers: { ...headers, 'Prefer': 'return=minimal' }, 
-
                     body: JSON.stringify(payload)
-
                 });
-
             } else {
-
                 res = await fetch(`${BASE_URL}/targets?id_target=eq.${editIdTarget}`, {
-
                     method: 'PATCH', 
-
                     headers: { ...headers, 'Prefer': 'return=minimal' }, 
-
                     body: JSON.stringify(payload)
-
                 });
-
                 cancelEdit();
-
             }
-
-
 
             if (!res.ok) throw new Error('Transaction Failed');
 
-
-
             Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
-
             
-
             document.getElementById('targetForm').reset();
+            tsIdWork.setValue('', true); // เคลียร์ช่องค้นหา
 
-
-
-            document.getElementById('filter_work').value = id_work;
-
+            tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
-
             await loadTableDataRaw();
-
             renderTable();
-
-
 
         } catch (e) {
-
             Swal.fire({icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', background: '#082f49', color: 'white'});
-
         } finally {
-
             document.getElementById('btnSave').disabled = false;
-
         }
-
     }
-
-
 
     async function loadTableDataRaw() {
-
         const res = await fetch(`${BASE_URL}/targets?select=*&order=id_target.desc`, { headers });
-
         tableData = await res.json();
-
     }
-
-
 
     async function loadTableData() {
-
         try {
-
             await loadTableDataRaw();
-
             renderTable();
-
         } catch(e) {
-
             Swal.fire({icon: 'error', title: 'Error', text: 'ดึงข้อมูลไม่สำเร็จ', background: '#082f49', color: 'white'});
-
         }
-
     }
-
-
 
     function renderTable() {
-
         const filterVal = document.getElementById('filter_work').value;
-
         const tbody = document.getElementById('dataTableBody');
-
         tbody.innerHTML = '';
 
-
-
         let filtered = tableData;
-
         if (filterVal) {
-
             filtered = tableData.filter(row => row.id_work == filterVal);
-
         }
-
-
 
         if (filtered.length === 0) {
-
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary" style="padding: 20px;">ไม่พบข้อมูลขั้นตอนสำหรับรหัสชิ้นงานนี้</td></tr>';
-
             return;
-
         }
-
-
 
         filtered.forEach(row => {
-
             let workCode = refWorks[row.id_work] ? refWorks[row.id_work] : `ID: ${row.id_work}`;
-
             let stepName = refSteps[row.id_step] ? refSteps[row.id_step] : `ID: ${row.id_step}`;
 
-
-
             let tr = document.createElement('tr');
-
             tr.innerHTML = `
-
                 <td class="fw-bold text-center">#${row.id_target}</td>
-
                 <td style="color: #0369a1; font-weight: bold;">${workCode}</td>
-
                 <td style="color: #0f766e;">${stepName}</td>
-
                 <td class="fw-bold" style="color: #047857;">${row.target_amount}</td>
-
                 <td class="text-center">
-
                     <button class="btn-action btn-edit" onclick="verifyPin(() => triggerEdit(${row.id_target}, ${row.id_work}, ${row.id_step}, ${row.target_amount}))">แก้ไข</button>
-
                     <button class="btn-action btn-delete" onclick="verifyPin(() => deleteRecord(${row.id_target}))">ลบ</button>
-
                 </td>
-
             `;
-
             tbody.appendChild(tr);
-
         });
-
     }
-
-
 
     async function verifyPin(actionCallback) {
-
         const { value: pin } = await Swal.fire({
-
             title: '🔒 ยืนยันตัวตน',
-
             text: 'กรุณาใส่รหัสผ่านเพื่อดำเนินการ',
-
             input: 'password',
-
             inputAttributes: { autocapitalize: 'off' },
-
             showCancelButton: true,
-
             confirmButtonText: 'ตกลง',
-
             cancelButtonText: 'ยกเลิก',
-
             background: '#041421', color: '#7dd3fc',
-
             customClass: { confirmButton: 'btn btn-cyan', cancelButton: 'btn btn-secondary' }
-
         });
-
-
 
         if (pin === '112233') {
-
             actionCallback();
-
         } else if (pin !== undefined) {
-
             Swal.fire({ icon: 'error', title: 'รหัสไม่ถูกต้อง', text: 'คุณไม่มีสิทธิ์ทำรายการนี้', background: '#041421', color: '#fb7185' });
-
         }
-
     }
-
-
 
     function triggerEdit(id_target, id_work, id_step, target_amount) {
-
         document.getElementById('edit_id_target').value = id_target;
-
-        document.getElementById('id_work').value = id_work;
-
+        tsIdWork.setValue(id_work, true); // เปลี่ยนค่าในช่องค้นหา
         onFormWorkChange();
-
         document.getElementById('id_step').value = id_step;
-
         document.getElementById('target_amount').value = target_amount;
-
         
-
         document.getElementById('btnSave').innerText = '[*] บันทึกการแก้ไข (UPDATE)';
-
         document.getElementById('btnSave').classList.replace('btn-cyan', 'btn-warning');
-
         document.getElementById('btnCancelEdit').style.display = 'block';
-
         
-
         window.scrollTo({ top: 0, behavior: 'smooth' });
-
     }
-
-
 
     function cancelEdit() {
-
         document.getElementById('targetForm').reset();
-
         document.getElementById('edit_id_target').value = '';
-
+        tsIdWork.setValue('', true); // เคลียร์ค่า
         
-
         document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
-
         document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
-
         document.getElementById('btnCancelEdit').style.display = 'none';
-
         onFormWorkChange();
-
     }
-
-
 
    async function deleteRecord(id_target) {
-
         const confirmDelete = await Swal.fire({
-
             title: 'ยืนยันการลบ?',
-
             text: "ข้อมูล Target ID #" + id_target + " จะถูกลบออกจากระบบอย่างถาวร!",
-
             icon: 'warning',
-
             showCancelButton: true,
-
             confirmButtonText: 'ลบทิ้ง',
-
             cancelButtonText: 'ยกเลิก',
-
             confirmButtonColor: '#ef4444',
-
             background: '#041421', color: '#7dd3fc'
-
         });
 
-
-
         if (confirmDelete.isConfirmed) {
-
             try {
-
                 const res = await fetch(`${BASE_URL}/targets?id_target=eq.${id_target}`, {
-
                     method: 'DELETE', headers: headers
-
                 });
-
                 
-
                 if (res.ok) {
-
                     Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
-
                     await loadTableDataRaw();
-
                     renderTable();
-
                 } else {
-
                     // ดึงข้อความ Error จากฐานข้อมูล
-
                     const errData = await res.json().catch(() => ({}));
-
                     
-
                     // ดักจับ Error 409 (ติด Foreign Key)
-
                     if (res.status === 409) {
-
                         Swal.fire({
-
                             icon: 'error', 
-
                             title: 'ลบข้อมูลไม่ได้!', 
-
                             text: 'เป้าหมายนี้มีการบันทึกยอดผลิตไปแล้ว (ติดประวัติการทำงาน) กรุณาลบประวัติในหน้าบันทึกการผลิตก่อนครับ', 
-
                             background: '#041421', 
-
                             color: '#fb7185'
-
                         });
-
                     } else {
-
                         throw new Error(errData.message || 'Delete Failed');
-
                     }
-
                 }
-
             } catch (e) {
-
                 Swal.fire({
-
                     icon: 'error', 
-
                     title: 'ข้อผิดพลาด', 
-
                     text: 'ลบข้อมูลไม่สำเร็จ: ' + e.message, 
-
                     background: '#041421', 
-
                     color: '#fb7185'
-
                 });
-
             }
-
         }
-
     }
 
-
-
     // ==============================================
-
     // โค้ดควบคุมหน้าต่างลอยคู่มือ (Drag, Open, Close)
-
     // ==============================================
-
     function openManual() {
-
         document.getElementById('floatingManual').style.display = 'flex';
-
         document.body.classList.add('manual-open'); // เลื่อนจอหลักหลบ
-
     }
-
-
 
     function closeManual() {
-
         document.getElementById('floatingManual').style.display = 'none';
-
         document.body.classList.remove('manual-open'); // คืนค่าจอหลัก
-
     }
-
-
 
     dragElement(document.getElementById("floatingManual"));
 
-
-
     function dragElement(elmnt) {
-
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
         var header = document.getElementById(elmnt.id + "Header");
-
         
-
         if (header) {
-
             header.onmousedown = dragMouseDown;
-
             header.ontouchstart = dragMouseDown;
-
         } else {
-
             elmnt.onmousedown = dragMouseDown;
-
             elmnt.ontouchstart = dragMouseDown;
-
         }
-
-
 
         function dragMouseDown(e) {
-
             e = e || window.event;
-
             if (e.type !== "touchstart") e.preventDefault();
-
             
-
             let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-
             let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-
             
-
             pos3 = clientX;
-
             pos4 = clientY;
-
             
-
             document.onmouseup = closeDragElement;
-
             document.onmousemove = elementDrag;
-
             document.ontouchend = closeDragElement;
-
             document.ontouchmove = elementDrag;
-
         }
-
-
 
         function elementDrag(e) {
-
             e = e || window.event;
-
             if (e.type !== "touchmove") e.preventDefault(); 
-
             
-
             let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-
             let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-
             
-
             pos1 = pos3 - clientX;
-
             pos2 = pos4 - clientY;
-
             pos3 = clientX;
-
             pos4 = clientY;
-
             
-
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-
             elmnt.style.right = 'auto'; 
-
         }
-
-
 
         function closeDragElement() {
-
             document.onmouseup = null;
-
             document.onmousemove = null;
-
             document.ontouchend = null;
-
             document.ontouchmove = null;
-
         }
-
     }
-
-
 
     // ฟังก์ชันสำหรับพิมพ์คู่มือ
-
     function printManual() {
-
         const manualHtml = document.getElementById('manualContent').innerHTML;
-
         const printWindow = window.open('', '_blank', 'width=800,height=600');
-
         
-
         printWindow.document.write(`
-
             <html>
-
             <head>
-
                 <title>พิมพ์คู่มือ - TARGET STOCK TERMINAL</title>
-
                 <style>
-
                     body { 
-
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-
                         color: #000; 
-
                         padding: 30px; 
-
                         line-height: 1.6; 
-
                     }
-
                     h2 { text-align: center; font-size: 24px; margin-bottom: 20px; }
-
                     .manual-section-title { 
-
                         font-size: 18px; 
-
                         font-weight: bold; 
-
                         margin-top: 25px; 
-
                         margin-bottom: 10px; 
-
                         border-bottom: 2px solid #ccc; 
-
                         padding-bottom: 5px; 
-
                         color: #000 !important;
-
                     }
-
                     ul, ol { padding-left: 25px; margin-top: 5px; }
-
                     li { margin-bottom: 10px; font-size: 15px; }
-
                     strong { color: #000 !important; }
-
                     span { color: #000 !important; background: transparent !important; padding: 0 !important; font-weight: bold; }
-
                     @media print {
-
                         body { padding: 0; }
-
                     }
-
                 </style>
-
             </head>
-
             <body>
-
                 <h2>📖 คู่มือการใช้งาน TARGET // STOCK TERMINAL</h2>
-
                 ${manualHtml}
-
             </body>
-
             </html>
-
         `);
-
         
-
         printWindow.document.close();
-
         printWindow.focus();
-
         
-
         setTimeout(() => {
-
             printWindow.print();
-
             printWindow.close();
-
         }, 300);
-
     }
-
 </script>
-
 </body>
-
 </html>
