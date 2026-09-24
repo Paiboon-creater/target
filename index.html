@@ -1,752 +1,1535 @@
 <!DOCTYPE html>
+
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>⚡ BATCH SMART ENTRY // CYBER BLUE ⚡</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap');
-    :root {
-      --bg-blue: #1e3a8a; --panel-bg: #ffffff; --blue-primary: #2563eb; 
-      --blue-dark: #1e40af; --blue-light: #eff6ff; --blue-gold: #f59e0b; 
-      --text-main: #1f2937; --text-muted: #6b7280; --input-bg: #fafafa; --border-dim: #e5e7eb;
-    }
-    body {
-      font-family: 'Kanit', sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e3a8a, #3b82f6);
-      background-attachment: fixed; color: var(--text-main);
-      margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-    }
-    .terminal-container {
-      width: 100%; max-width: 750px; background: var(--panel-bg);
-      padding: 20px 15px; border-radius: 12px; border: 3px solid var(--blue-gold);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 158, 11, 0.4);
-      margin-bottom: 15px; box-sizing: border-box;
-    }
-    .app-header {
-      display: flex; align-items: center; justify-content: center; gap: 15px;
-      border-bottom: 3px solid var(--blue-gold); padding-bottom: 12px; margin-bottom: 15px;
-    }
-    .emblem {
-      width: 50px; height: 50px; background: var(--blue-primary); border: 3px solid var(--blue-gold);
-      border-radius: 50%; display: flex; justify-content: center; align-items: center;
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
-    }
-    .emblem i { font-size: 24px; color: var(--blue-gold); }
-    .app-title { font-size: 1.3rem; font-weight: 800; font-style: italic; color: var(--blue-primary); margin: 0; text-transform: uppercase; }
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>TARGET PROJECT // STOCK TERMINAL</title>
+
+    <!-- Bootstrap 5 CSS -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 6px; font-size: 15px; font-weight: 700; color: var(--blue-dark); }
-    input, select {
-      width: 100%; padding: 12px; background-color: var(--input-bg); border: 2px solid var(--border-dim); 
-      color: var(--text-main); font-weight: 600; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;
-    }
-    input[type="date"] { text-align: center; }
-    input:focus, select:focus { border-color: var(--blue-gold); outline: none; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); background-color: #fff; }
 
-    .hours-period-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; }
+    <style>
 
-    .task-row-box { background: var(--blue-light); border: 2px dashed var(--blue-primary); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-    .task-row-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
-    @media(min-width: 480px) {
-      /* ปรับเป็น 4 คอลัมน์ให้สวยงาม */
-      .task-row-grid { display: grid; grid-template-columns: 1.5fr 1.5fr 0.8fr 1.2fr; gap: 6px; }
-    }
-    .remove-task-btn { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        :root {
 
-    .nav-buttons-wrapper { display: flex; gap: 10px; margin-bottom: 15px; }
-    .nav-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1;
-      background: #fff; color: var(--blue-primary); border: 2px solid var(--blue-primary);
-      padding: 10px; font-size: 14px; border-radius: 8px; text-decoration: none; font-weight: 700; text-transform: uppercase;
-    }
-    .nav-btn:hover { background: var(--blue-primary); color: #fff; }
+            --bg-dark: #041421;
 
-    .emp-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
-    .add-btn { background: var(--blue-primary); color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-    .selected-emp-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .emp-badge {
-      background: var(--blue-light); border: 1px solid var(--blue-primary); color: var(--blue-dark);
-      padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;
-    }
-    .emp-badge span { color: #ef4444; cursor: pointer; font-weight: bold; }
+            --panel-bg: #082f49;
 
-    .preview-table-wrapper { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 2px solid var(--blue-primary); }
-    .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; }
-    .preview-table th { background: var(--blue-primary); color: white; padding: 8px 4px; font-weight: 700; }
-    .preview-table td { padding: 6px 4px; border-bottom: 1px solid var(--border-dim); background: #fff; }
+            --border-cyan: #06b6d4;
 
-    .action-btn {
-      width: 100%; background: linear-gradient(90deg, var(--blue-dark), var(--blue-primary)); color: #ffffff; border: 2px solid var(--blue-gold); padding: 16px; font-size: 18px;
-      border-radius: 8px; cursor: pointer; font-weight: 800; font-style: italic; margin-top: 15px; font-family: inherit; box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4); text-transform: uppercase;
-    }
-    .action-btn:hover { background: linear-gradient(90deg, var(--blue-primary), var(--blue-gold)); }
-    .preview-btn { background: #10b981; border-color: #059669; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+            --text-light-blue: #7dd3fc;
 
-    .history-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-top: 25px; transition: 0.3s; }
-    .history-card h3 { color: var(--blue-dark); margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;}
-    .history-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: center; margin-bottom: 10px; }
-    .btn-history-load { background: var(--blue-gold); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; height: 100%; }
-    .btn-history-load:hover { background: #d97706; color: #fff; }
-    .btn-fullscreen { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
-    .history-table-wrapper { max-height: 350px; overflow-y: auto; margin-top: 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-    .btn-row-edit { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-    .btn-row-delete { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 4px; }
-    
-    /* Fullscreen Mode */
-    .fullscreen-active {
-      position: fixed !important; top: 0; left: 0; right: 0; bottom: 0;
-      width: 100vw; height: 100vh; background-color: #f8fafc !important;
-      z-index: 10000; margin: 0 !important; padding: 30px !important;
-      border-radius: 0 !important; overflow-y: auto;
-    }
-    .fullscreen-active .history-table-wrapper { max-height: calc(100vh - 160px) !important; }
-  </style>
+            --text-cyan: #22d3ee;
+
+            --text-white: #f0f9ff;
+
+            --input-bg: #021a2c;
+
+            --table-bg: #f0fdfa;
+
+            --table-text-dark: #0f172a;
+
+            --table-th-bg: #ccfbf1;
+
+        }
+
+
+
+        body {
+
+            background-color: var(--bg-dark);
+
+            color: var(--text-light-blue);
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            padding: 20px 0;
+
+            -webkit-text-size-adjust: 100%;
+
+            transition: padding-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+        }
+
+
+
+        /* คลาสสำหรับขยับหน้าจอหลักหลบคู่มือด้านซ้าย */
+
+        @media (min-width: 1024px) {
+
+            body.manual-open {
+
+                padding-left: 360px;
+
+            }
+
+        }
+
+
+
+        .container { 
+
+            max-width: 950px; 
+
+            margin: 0 auto;
+
+            position: relative; 
+
+        }
+
+
+
+        .terminal-header {
+
+            color: var(--text-cyan);
+
+            text-align: center;
+
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+
+            font-weight: bold;
+
+            margin-bottom: 20px;
+
+            letter-spacing: 1px;
+
+            font-size: 1.5rem;
+
+        }
+
+
+
+        .top-buttons {
+
+            position: absolute;
+
+            top: -5px;
+
+            right: 0;
+
+            display: flex;
+
+            gap: 10px;
+
+            z-index: 10;
+
+        }
+
+
+
+        .header-btn {
+
+            background-color: rgba(6, 182, 212, 0.1);
+
+            border: 1px solid var(--border-cyan);
+
+            color: var(--text-cyan);
+
+            padding: 6px 16px;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+
+            font-size: 0.9rem;
+
+            text-decoration: none;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            transition: all 0.3s ease;
+
+            cursor: pointer;
+
+        }
+
+        
+
+        .header-btn:hover {
+
+            background-color: var(--text-cyan);
+
+            color: var(--bg-dark);
+
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+
+        }
+
+
+
+        @media (max-width: 768px) {
+
+            .top-buttons {
+
+                position: static;
+
+                justify-content: center;
+
+                margin-bottom: 20px;
+
+                margin-top: 10px;
+
+            }
+
+            .header-wrapper {
+
+                text-align: center;
+
+            }
+
+            .terminal-header { margin-top: 10px; }
+
+        }
+
+
+
+        .card-stock {
+
+            background-color: var(--panel-bg);
+
+            border: 1px solid var(--border-cyan);
+
+            border-radius: 12px;
+
+            padding: 1.25rem;
+
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.6);
+
+            margin-bottom: 1.5rem;
+
+        }
+
+
+
+        .form-label { color: var(--text-light-blue); font-weight: bold; font-size: 0.9rem; }
+
+        
+
+        .form-control-stock, .form-select-stock {
+
+            background-color: var(--input-bg);
+
+            border: 1px solid #0e7490;
+
+            color: var(--text-light-blue);
+
+            border-radius: 6px;
+
+            font-size: 1rem;
+
+            padding: 10px;
+
+        }
+
+        .form-control-stock:focus, .form-select-stock:focus {
+
+            background-color: var(--input-bg);
+
+            color: var(--text-white);
+
+            border-color: var(--text-cyan);
+
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+
+            outline: none;
+
+        }
+
+
+
+        .btn-cyan { background-color: #0891b2; color: white; font-weight: bold; border: none; }
+
+        .btn-cyan:hover { background-color: #0e7490; color: white; }
+
+
+
+        .table-wrapper {
+
+            background-color: var(--table-bg);
+
+            border-radius: 12px;
+
+            padding: 15px;
+
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+
+        }
+
+        .filter-box { 
+
+            background-color: #082f49; 
+
+            padding: 12px; 
+
+            border-radius: 8px; 
+
+            margin-bottom: 15px; 
+
+            border: 1px dashed var(--border-cyan);
+
+            color: var(--text-light-blue);
+
+        }
+
+        
+
+        .stock-table { color: var(--table-text-dark); font-size: 0.85rem; }
+
+        .stock-table th { 
+
+            background-color: var(--table-th-bg); 
+
+            color: var(--table-text-dark); 
+
+            border-bottom: 2px solid #14b8a6; 
+
+            white-space: nowrap; 
+
+            font-weight: bold; 
+
+        }
+
+        .stock-table td { vertical-align: middle; border-color: #99f6e4; white-space: nowrap; color: var(--table-text-dark); }
+
+        .stock-table tbody tr:hover { background-color: #e2e8f0; }
+
+        
+
+        .btn-action { padding: 3px 8px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; }
+
+        .btn-edit { background-color: #f59e0b; color: white; border: none; margin-right: 4px; }
+
+        .btn-delete { background-color: #ef4444; color: white; border: none; }
+
+
+
+        /* ==============================================
+
+           CSS สำหรับหน้าต่างคู่มือแบบลอยจัดด้านซ้าย
+
+        =============================================== */
+
+        .floating-window {
+
+            position: fixed;
+
+            top: 15px;
+
+            left: 15px;
+
+            width: 340px;
+
+            height: calc(100vh - 30px);
+
+            min-width: 280px; 
+
+            min-height: 300px;
+
+            background-color: var(--panel-bg);
+
+            border: 2px solid var(--border-cyan);
+
+            border-radius: 10px;
+
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(6, 182, 212, 0.3);
+
+            z-index: 9999;
+
+            flex-direction: column;
+
+            overflow: hidden;
+
+            resize: both;
+
+            display: none; 
+
+            transition: opacity 0.3s ease;
+
+        }
+
+        
+
+        .floating-header {
+
+            background-color: #0e7490;
+
+            color: var(--text-cyan);
+
+            padding: 12px 15px;
+
+            font-weight: bold;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            cursor: grab;
+
+            border-bottom: 1px solid var(--border-cyan);
+
+            user-select: none;
+
+            flex-shrink: 0;
+
+            font-size: 1rem;
+
+        }
+
+        
+
+        .floating-header:active {
+
+            cursor: grabbing;
+
+        }
+
+
+
+        .floating-body {
+
+            padding: 15px;
+
+            overflow-y: auto;
+
+            color: var(--text-white);
+
+            font-size: 0.9rem;
+
+            line-height: 1.7;
+
+            flex-grow: 1;
+
+        }
+
+
+
+        .floating-body::-webkit-scrollbar { width: 8px; }
+
+        .floating-body::-webkit-scrollbar-track { background: #021a2c; }
+
+        .floating-body::-webkit-scrollbar-thumb { background-color: #0e7490; border-radius: 10px; }
+
+        .floating-body::-webkit-scrollbar-thumb:hover { background-color: #06b6d4; }
+
+
+
+        .floating-footer {
+
+            padding: 10px 15px;
+
+            padding-right: 25px;
+
+            border-top: 1px solid var(--border-cyan);
+
+            background-color: #041421;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            flex-shrink: 0;
+
+        }
+
+
+
+        .manual-section-title {
+
+            font-weight: bold;
+
+            margin-top: 20px;
+
+            border-bottom: 1px dashed;
+
+            padding-bottom: 5px;
+
+            margin-bottom: 10px;
+
+        }
+
+        .manual-section-title:first-child { margin-top: 0; }
+
+
+
+        .floating-body ul, .floating-body ol { padding-left: 20px; margin-bottom: 15px; }
+
+        .floating-body li { margin-bottom: 6px; }
+
+
+
+        @media (max-width: 1024px) {
+
+            .floating-window { 
+
+                width: 90%; 
+
+                left: 5%; 
+
+                top: 5%; 
+
+                height: 85vh; 
+
+            }
+
+        }
+
+    </style>
+
 </head>
+
 <body>
 
-<div class="terminal-container">
-  <div class="nav-buttons-wrapper">
-    <a href="https://paiboon-creater.github.io/fast_form_daily/" class="nav-btn"><i class="fa-solid fa-house"></i> หน้าหลัก</a>
-    <a href="#" class="nav-btn" style="background: var(--blue-primary); color: #fff;"><i class="fa-solid fa-users-gear"></i> งานกลุ่ม (Active)</a>
-  </div>
 
-  <div class="app-header">
-    <div class="emblem"><i class="fa-solid fa-industry"></i></div>
-    <div><h1 class="app-title">⚡ บันทึกงานกลุ่ม (SMART BATCH)</h1></div>
-  </div>
 
-  <form id="batchForm" onsubmit="event.preventDefault();">
+<div class="container header-wrapper">
 
-    <div class="form-group">
-      <label>📅 1. วันที่ทำงาน</label>
-      <input type="date" id="batch_date" required>
+    <!-- กลุ่มปุ่มบนขวา -->
+
+    <div class="top-buttons">
+
+        <button type="button" class="header-btn" onclick="openManual()">
+
+            📖 คู่มือ
+
+        </button>
+
+        <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="header-btn">
+
+            🏠 Home App
+
+        </a>
+
     </div>
 
-    <div class="form-group">
-      <label>⏱️ 2. ช่วงเวลา และชั่วโมงทำงาน / คน</label>
-      <div class="hours-period-grid">
-        <select id="batch_work_period" required>
-          <option value="ปกติ" selected>🟢 ช่วงเวลา: ปกติ</option>
-          <option value="โอที">🟠 ช่วงเวลา: โอที</option>
-        </select>
-        <input type="number" id="batch_hours" value="8" step="0.5" required placeholder="จำนวน ชม.">
-      </div>
+
+
+    <h2 class="terminal-header">📈 TARGET // STOCK TERMINAL</h2>
+
+    
+
+    <!-- ฟอร์มกรอกข้อมูล -->
+
+    <div class="card card-stock">
+
+        <form id="targetForm">
+
+            <input type="hidden" id="edit_id_target" value="">
+
+            
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">⚙️ รหัสชิ้นงาน (Work Code - id_work)</label>
+
+                    <select id="id_work" class="form-select form-select-stock" required onchange="onFormWorkChange()">
+
+                        <option value="">-- เลือกรหัสชิ้นงาน --</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">🔧 ขั้นตอนการทำงาน (Step Name - id_step)</label>
+
+                    <select id="id_step" class="form-select form-select-stock" required>
+
+                        <option value="">-- เลือกขั้นตอนการทำงาน --</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="mb-3">
+
+                <label class="form-label">📊 จำนวนเป้าหมาย (Target Amount)</label>
+
+                <input type="number" id="target_amount" class="form-control form-control-stock" placeholder="ระบุจำนวนเป้าหมาย..." required>
+
+            </div>
+
+
+
+            <div class="d-flex gap-2 mt-2">
+
+                <button type="button" class="btn btn-cyan w-100 py-2" id="btnSave" onclick="saveData()">[+] บันทึกข้อมูล (SAVE)</button>
+
+                <button type="button" class="btn btn-secondary w-25" id="btnCancelEdit" style="display:none;" onclick="cancelEdit()">ยกเลิก</button>
+
+            </div>
+
+        </form>
+
     </div>
 
-    <div class="form-group">
-      <label>🏃 3. เพิ่มรายชื่อพนักงาน (พิมพ์ชื่อและกด <kbd>Enter</kbd> หรือกดปุ่ม)</label>
-      <div class="emp-input-row">
-        <input type="text" id="emp_search_input" list="emp_datalist" placeholder="พิมพ์ชื่อพนักงาน..." autocomplete="off">
-        <button type="button" class="add-btn" onclick="addEmployee()"><i class="fa-solid fa-plus"></i> เพิ่ม</button>
-      </div>
-      <datalist id="emp_datalist"></datalist>
-      <div class="selected-emp-list" id="selectedEmpContainer"></div>
-    </div>
 
-    <div class="form-group">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <label style="margin:0;">📦 4. รายการใบสั่งงาน ขั้นตอน ยอดผลิต และหมายเหตุ</label>
-        <button type="button" class="add-btn" style="padding: 6px 12px; font-size: 13px;" onclick="addTaskRow()"><i class="fa-solid fa-plus"></i> เพิ่มใบสั่งงาน</button>
-      </div>
-      
-      <div id="taskRowsContainer"></div>
-      <datalist id="order_datalist"></datalist>
-      <div style="font-size: 12px; color: var(--blue-primary); margin-top: 5px;">* พิมพ์ช่องหมายเหตุเสร็จ กด <kbd>Enter</kbd> เพื่อเพิ่มบรรทัดใหม่ได้ทันที</div>
-    </div>
 
-    <button type="button" class="action-btn preview-btn" onclick="generatePreview()"><i class="fa-solid fa-eye"></i> พรีวิวตารางงานก่อนบันทึก</button>
-  </form>
+    <!-- ส่วนแสดงตารางรายละเอียดข้อมูลด้านล่าง -->
 
-  <div id="previewSection" style="display: none;">
-    <h3 style="color: var(--blue-primary); font-size: 1.1rem; text-align: center; margin: 20px 0 10px 0; font-weight: 800; font-style: italic;">⚡ พรีวิวข้อมูลก่อนบันทึกจริง</h3>
-    <div class="preview-table-wrapper">
-      <table class="preview-table">
-        <thead>
-          <tr>
-            <th>พนักงาน</th>
-            <th>รหัส 5 หลัก / ใบสั่ง / ขั้นตอน</th>
-            <th>ช่วงเวลา</th>
-            <th>ชม.</th>
-            <th>ยอดผลิต</th>
-            <th>EFF%</th>
-            <th>หมายเหตุ</th>
-          </tr>
-        </thead>
-        <tbody id="previewTbody"></tbody>
-      </table>
-    </div>
+    <div id="tableSection">
 
-    <div class="form-group" id="reasonGroup" style="display: none; margin-top: 15px;">
-      <label style="color: var(--blue-dark);">ℹ️ มีพนักงานประสิทธิภาพต่ำกว่า 85% (ไม่บังคับเลือก สามารถเว้นว่างได้)</label>
-      <select id="id_reason">
-        <option value="">-- ไม่ระบุสาเหตุ (ปล่อยว่างได้) --</option>
-      </select>
-    </div>
+        <div class="table-wrapper">
 
-    <button type="button" class="action-btn" id="confirmSubmitBtn" onclick="executeBatchSubmit()"><i class="fa-solid fa-bolt"></i> ยืนยันบันทึกข้อมูลด้วยความเร็วแสง!</button>
-  </div>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-  <!-- 📂 ส่วนดึงประวัติงานกลุ่มตามช่วงวันที่และขั้นตอน -->
-  <div class="history-card" id="historyCardContainer">
-    <h3>
-      <span><i class="fa-solid fa-box-open"></i> จัดการประวัติการทำงาน (กรองตามช่วงเวลาและขั้นตอน)</span>
-      <button class="btn-fullscreen" onclick="toggleFullscreen()"><i class="fa-solid fa-expand" id="fs-icon"></i> ขยายเต็มจอ</button>
-    </h3>
-    <div class="history-filters">
-      <div>
-        <label style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 2px;">วันที่เริ่มต้น</label>
-        <input type="date" id="history_date_start">
-      </div>
-      <div>
-        <label style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 2px;">วันที่สิ้นสุด</label>
-        <input type="date" id="history_date_end">
-      </div>
-      <div>
-        <label style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 2px;">เลือกขั้นตอนการผลิต</label>
-        <select id="history_step_filter">
-          <option value="">-- ทุกขั้นตอน --</option>
-        </select>
-      </div>
-      <div style="align-self: flex-end;">
-        <button type="button" class="btn-history-load" onclick="loadProductionHistory()"><i class="fa-solid fa-search"></i> ค้นหาประวัติ</button>
-      </div>
+                <h5 style="color: var(--table-text-dark); font-weight: bold; margin:0;">ตารางตรวจสอบข้อมูลเป้าหมาย (Targets Matrix)</h5>
+
+                <button class="btn btn-sm btn-primary fw-bold" onclick="loadTableData()">รีเฟรชข้อมูล</button>
+
+            </div>
+
+
+
+            <div class="filter-box d-flex justify-content-between align-items-end flex-wrap gap-2">
+
+                <div style="flex: 1; min-width: 250px;">
+
+                    <label class="form-label mb-1" style="color: var(--text-light-blue); font-size:0.85rem;">🔍 กรองตรวจสอบตามรหัสชิ้นงาน (Realtime Filter)</label>
+
+                    <select id="filter_work" class="form-select form-select-stock" onchange="onFilterWorkChange()">
+
+                        <option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="table-responsive">
+
+                <table class="table stock-table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID Target</th>
+
+                            <th>รหัสชิ้นงาน (Work Code)</th>
+
+                            <th>ขั้นตอนการทำงาน (Step Name)</th>
+
+                            <th>Target Amount</th>
+
+                            <th class="text-center">จัดการ</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="dataTableBody">
+
+                        <tr><td colspan="5" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
-    <div class="history-table-wrapper">
-      <table class="preview-table" style="font-size: 11px;">
-        <thead>
-          <tr>
-            <th>วันที่</th>
-            <th>พนักงาน</th>
-            <th>รหัสชิ้นงาน / ใบสั่ง / ขั้นตอน</th>
-            <th>ช่วงเวลา</th>
-            <th>ชม.</th>
-            <th>ยอดผลิต</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="historyTbody">
-          <tr><td colspan="7" style="padding: 15px; color: var(--text-muted);">กำลังโหลดข้อมูล...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
 </div>
 
-<script>
-  const SUPABASE_URL = "https://siiiifesdjuunwmwozfb.supabase.co/rest/v1";
-  const SUPABASE_KEY = "sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT";
-  const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", "Prefer": "return=representation" };
 
-  let globalOrders = [];
-  let globalEmployees = [];
-  let globalTargets = [];
-  let globalReasons = [];
-  let globalWorkItems = [];
-  let globalSteps = [];
-  let selectedEmployeeList = [];
-  let preparedPayload = [];
 
-  // ==========================================
-  // ⌨️ ระบบกด Enter เปลี่ยนช่อง / เพิ่มข้อมูล
-  // ==========================================
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      const target = e.target;
-      
-      if(target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'BUTTON') {
-        e.preventDefault();
-      }
+<!-- ==============================================
 
-      if (target.tagName === 'BUTTON') {
-        target.click();
-        return;
-      }
+     หน้าต่างคู่มือแบบลอย (วางซ้ายมือ ลากย่อขยายได้)
 
-      if (target.id === 'emp_search_input') {
-        addEmployee();
-        return;
-      }
-      
-      // อัปเดตให้กด Enter ที่ช่องหมายเหตุแล้วเพิ่มบรรทัดใหม่
-      if (target.classList.contains('task-remark')) {
-        addTaskRow();
-        const rows = document.querySelectorAll('.task-row-box');
-        const lastRow = rows[rows.length - 1];
-        lastRow.querySelector('.order-search').focus();
-        return;
-      }
+=============================================== -->
 
-      const focusables = Array.from(document.querySelectorAll('input:not([type="hidden"]), select, button:not([disabled])'))
-                              .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
-      const index = focusables.indexOf(target);
-      if (index > -1 && index < focusables.length - 1) {
-        focusables[index + 1].focus();
-      }
-    }
-  });
+<div id="floatingManual" class="floating-window">
 
-  window.onload = async function() {
-    document.getElementById('batch_date').value = '';
+    <div class="floating-header" id="floatingManualHeader">
 
-    try {
-      const [ordersRes, empsRes, targetsRes, reasonsRes, worksRes, stepsRes] = await Promise.all([
-        fetch(SUPABASE_URL + "/orders?select=*", { headers }),
-        fetch(SUPABASE_URL + "/employees?select=*", { headers }),
-        fetch(SUPABASE_URL + "/targets?select=*", { headers }),
-        fetch(SUPABASE_URL + "/reasons?select=*", { headers }),
-        fetch(SUPABASE_URL + "/work_items?select=*", { headers }),
-        fetch(SUPABASE_URL + "/production_steps?select=*", { headers })
-      ]);
+        <span style="font-size: 0.95rem;">📖 คู่มือการใช้งาน (ลาก/ย่อขยายได้)</span>
 
-      if(ordersRes.ok) globalOrders = await ordersRes.json();
-      if(empsRes.ok) {
-        globalEmployees = await empsRes.json();
-        globalEmployees.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'th'));
-      }
-      if(targetsRes.ok) globalTargets = await targetsRes.json();
-      if(reasonsRes.ok) globalReasons = await reasonsRes.json();
-      if(worksRes.ok) globalWorkItems = await worksRes.json();
-      if(stepsRes.ok) globalSteps = await stepsRes.json();
+        <button type="button" class="btn-close btn-close-white" style="font-size: 0.75rem;" onclick="closeManual()"></button>
 
-      const empDatalist = document.getElementById('emp_datalist');
-      globalEmployees.forEach(emp => {
-        let opt = document.createElement('option');
-        opt.value = emp.name;
-        empDatalist.appendChild(opt);
-      });
+    </div>
 
-      const orderDatalist = document.getElementById('order_datalist');
-      globalOrders.forEach(ord => {
-        let opt = document.createElement('option');
-        opt.value = `${ord.order_no} (ID: ${ord.id_order})`;
-        orderDatalist.appendChild(opt);
-      });
-
-      const reasonSelect = document.getElementById('id_reason');
-      globalReasons.forEach(r => {
-        let opt = document.createElement('option');
-        opt.value = r.id_reason;
-        opt.textContent = r.reason_detail;
-        reasonSelect.appendChild(opt);
-      });
-
-      // เติมตัวเลือกขั้นตอนลงในตัวกรองประวัติ
-      const stepSelectFilter = document.getElementById('history_step_filter');
-      globalSteps.forEach(s => {
-        let opt = document.createElement('option');
-        opt.value = s.id_step;
-        opt.textContent = s.step_name;
-        stepSelectFilter.appendChild(opt);
-      });
-
-      // ค้นหาและตั้งค่าเริ่มต้นให้เป็นขั้นตอน "แพ็ค/แพค"
-      let defaultPackingStep = globalSteps.find(s => s.step_name && (s.step_name.includes('แพ็ค') || s.step_name.includes('แพค')));
-      if (defaultPackingStep) {
-        stepSelectFilter.value = defaultPackingStep.id_step;
-      }
-
-      addTaskRow();
-
-      // ตั้งค่าวันที่เริ่มต้นและสิ้นสุดเป็นวันปัจจุบัน พร้อมดึงประวัติ
-      const todayStr = new Date().toISOString().split('T')[0];
-      document.getElementById('history_date_start').value = todayStr;
-      document.getElementById('history_date_end').value = todayStr;
-      
-      loadProductionHistory();
-
-    } catch(e) {
-      alert("⚠️ โหลดข้อมูลไม่สำเร็จ: " + e.message);
-    }
-  };
-
-  function addTaskRow() {
-    const container = document.getElementById('taskRowsContainer');
-    const div = document.createElement('div');
-    div.className = 'task-row-box';
-    div.innerHTML = `
-      <div class="task-row-grid">
-        <input type="text" class="order-search" list="order_datalist" placeholder="ค้นหาใบสั่ง..." autocomplete="off" oninput="handleOrderInput(this)" onchange="handleOrderInput(this)">
-        <select class="target-select" required>
-          <option value="">👉 เลือกขั้นตอน</option>
-        </select>
-        <input type="number" class="order-qty" placeholder="ยอดรวม">
-        <input type="text" class="task-remark" placeholder="หมายเหตุ/M/C" autocomplete="off">
-      </div>
-      <div style="text-align: right; margin-top: 5px;">
-        <button type="button" class="remove-task-btn" onclick="this.closest('.task-row-box').remove()"><i class="fa-solid fa-trash"></i> ลบแถวนี้</button>
-      </div>
-    `;
-    container.appendChild(div);
-  }
-
-  function handleOrderInput(inputEl) {
-    let rawVal = inputEl.value.trim();
-    const box = inputEl.closest('.task-row-box');
-    const targetSelect = box.querySelector('.target-select');
     
-    targetSelect.innerHTML = '<option value="">👉 เลือกขั้นตอน</option>';
 
-    if(!rawVal) return;
+    <div class="floating-body" id="manualContent">
 
-    let orderNoClean = rawVal.split('(')[0].trim().toLowerCase();
-    const foundOrd = globalOrders.find(o => String(o.order_no).trim().toLowerCase() === orderNoClean);
-    if(!foundOrd) return;
+        <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">📝 การเพิ่มข้อมูลเป้าหมายใหม่</div>
 
-    if(foundOrd.id_work === null || foundOrd.id_work === undefined || foundOrd.id_work === "") {
-      let opt = document.createElement('option');
-      opt.value = "";
-      opt.textContent = "⚠️ ออเดอร์นี้ยังไม่ได้ผูกรหัสชิ้นงาน";
-      targetSelect.appendChild(opt);
-      return;
-    }
+        <ol>
 
-    const targetWorkIdStr = String(foundOrd.id_work).trim();
-    const targetsForThisWork = globalTargets.filter(t => String(t.id_work).trim() === targetWorkIdStr);
+            <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ</li>
 
-    if(targetsForThisWork.length === 0) {
-      let opt = document.createElement('option');
-      opt.value = "";
-      opt.textContent = "⚠️ ชิ้นงานนี้ยังไม่ได้ตั้งเป้าหมาย (Targets)";
-      targetSelect.appendChild(opt);
-      return;
-    }
+            <li>ที่ช่อง <strong>ขั้นตอนการทำงาน</strong> ให้เลือกขั้นตอนการผลิต กรณีไม่พบ ขั้นตอนที่ต้องการกรุณาติดต่อผู้สร้างระบบฐานข้อมูล</li>
 
-    const foundWork = globalWorkItems.find(w => String(w.id_work).trim() === targetWorkIdStr);
-    const workCode = foundWork ? foundWork.work_code : `ID:${targetWorkIdStr}`;
+            <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย(ชิ้น/ต่อคน/ต่อชม.)</li>
 
-    targetsForThisWork.forEach(t => {
-      const foundStep = globalSteps.find(s => String(s.id_step).trim() === String(t.id_step).trim());
-      const stepName = foundStep ? foundStep.step_name : `ขั้นตอน #${t.id_step}`;
+            <li>กดปุ่ม <strong style="color: #22d3ee;">[+] บันทึกข้อมูล (SAVE)</strong></li>
 
-      let opt = document.createElement('option');
-      opt.value = JSON.stringify({ 
-        id_target: parseInt(t.id_target), 
-        id_work: parseInt(t.id_work), 
-        target_amount: t.target_amount 
-      });
-      opt.textContent = `[#${t.id_target}] ${workCode} | ${stepName} (เป้า: ${t.target_amount}/ชม.)`;
-      targetSelect.appendChild(opt);
-    });
+        </ol>
 
-    if (targetsForThisWork.length === 1) { targetSelect.selectedIndex = 1; }
-  }
 
-  function addEmployee() {
-    const input = document.getElementById('emp_search_input');
-    const nameVal = input.value.trim();
-    if(!nameVal) return;
 
-    const empObj = globalEmployees.find(e => e.name === nameVal);
-    if(!empObj) {
-      alert("⚠️ ไม่พบชื่อพนักงานนี้ กรุณาเลือกจากรายการค้นหา");
-      return;
-    }
+        <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">🔍 การกรองข้อมูล</div>
 
-    if(selectedEmployeeList.some(e => e.id_name === empObj.id_name)) {
-      alert("⚠️ พนักงานคนนี้ถูกเพิ่มไปแล้วครับ");
-      input.value = '';
-      return;
-    }
+        <ul>
 
-    selectedEmployeeList.push(empObj);
-    renderSelectedEmployees();
-    input.value = '';
-    input.focus();
-  }
+            <li>ตารางด้านล่างมีช่อง <strong>กรองตรวจสอบตามรหัสชิ้นงาน</strong></li>
 
-  function removeEmployee(id_name) {
-    selectedEmployeeList = selectedEmployeeList.filter(e => e.id_name !== id_name);
-    renderSelectedEmployees();
-  }
+            <li>เมื่อเปลี่ยนรหัสชิ้นงาน ตารางจะแสดงเฉพาะข้อมูลของชิ้นงานนั้นๆ ทันที</li>
 
-  function renderSelectedEmployees() {
-    const container = document.getElementById('selectedEmpContainer');
-    container.innerHTML = '';
-    selectedEmployeeList.forEach(emp => {
-      let badge = document.createElement('div');
-      badge.className = 'emp-badge';
-      badge.innerHTML = `${emp.name} <span onclick="removeEmployee(${emp.id_name})">&times;</span>`;
-      container.appendChild(badge);
-    });
-  }
+        </ul>
 
-  function generatePreview() {
-    const dateVal = document.getElementById('batch_date').value;
-    const workPeriodVal = document.getElementById('batch_work_period').value;
-    const totalHoursPerEmp = parseFloat(document.getElementById('batch_hours').value) || 8;
 
-    if(!dateVal) { alert("⚠️ กรุณาระบุวันที่ทำงานด้านบนด้วยครับ"); return; }
-    if(selectedEmployeeList.length === 0) { alert("⚠️ กรุณาเพิ่มรายชื่อพนักงานอย่างน้อย 1 คนครับ!"); return; }
 
-    let tasks = [];
-    let isValidTasks = true;
+        <div class="manual-section-title" style="color: #f59e0b; border-color: #f59e0b;">✏️ การแก้ไขข้อมูล</div>
 
-    document.querySelectorAll('.task-row-box').forEach(box => {
-      let rawVal = box.querySelector('.order-search').value.trim();
-      let targetValStr = box.querySelector('.target-select').value;
-      let qty = parseFloat(box.querySelector('.order-qty').value) || 0;
-      let remarkVal = box.querySelector('.task-remark').value.trim(); // ดึงหมายเหตุของแต่ละแถว
+        <ol>
 
-      if(rawVal || targetValStr || qty > 0) {
-        if(!rawVal || !targetValStr || qty <= 0) { isValidTasks = false; return; }
+            <li>กดปุ่ม <span style="background-color:#f59e0b; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">แก้ไข</span> ในตาราง</li>
 
-        let orderNoClean = rawVal.split('(')[0].trim().toLowerCase();
-        const foundOrd = globalOrders.find(o => String(o.order_no).trim().toLowerCase() === orderNoClean);
-        let orderId = foundOrd ? foundOrd.id_order : null;
+            <li>กรอกรหัสผ่าน <strong>เพื่อยืนยันตัวตน</strong></li>
 
-        if(!orderId) { isValidTasks = false; return; }
+            <li>แก้ไขจำนวนที่ฟอร์มด้านบน และกด <br><strong style="color: #f59e0b;">[*] บันทึกการแก้ไข</strong></li>
 
-        let targetData = JSON.parse(targetValStr);
-        let foundWork = globalWorkItems.find(w => String(w.id_work).trim() === String(targetData.id_work).trim());
-        let workCodeText = foundWork ? foundWork.work_code : targetData.id_work;
+        </ol>
 
-        let foundTargetObj = globalTargets.find(t => String(t.id_target).trim() === String(targetData.id_target).trim());
-        let stepNameText = "";
-        if (foundTargetObj) {
-          let foundStep = globalSteps.find(s => String(s.id_step).trim() === String(foundTargetObj.id_step).trim());
-          if (foundStep) stepNameText = foundStep.step_name;
+
+
+        <div class="manual-section-title" style="color: #ef4444; border-color: #ef4444;">🗑️ การลบข้อมูล</div>
+
+        <ol>
+
+            <li>กดปุ่ม <span style="background-color:#ef4444; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:bold;">ลบ</span> ในตาราง</li>
+
+            <li>กรอกรหัสผ่าน <strong>เพื่อยืนยันตัวตน</strong> แล้วกดยืนยัน</li>
+
+        </ol>
+
+    </div>
+
+    
+
+    <div class="floating-footer">
+
+        <button type="button" class="btn btn-primary fw-bold btn-sm" onclick="printManual()" style="background-color: #0ea5e9; border:none;">🖨️ พิมพ์คู่มือ</button>
+
+        <button type="button" class="btn btn-secondary fw-bold btn-sm" onclick="closeManual()" style="background-color: #475569; border:none;">ปิด</button>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    const BASE_URL = 'https://siiiifesdjuunwmwozfb.supabase.co/rest/v1';
+
+    const SUPABASE_KEY = 'sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT';
+
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+
+
+
+    let refWorks = {};
+
+    let refSteps = {};
+
+    let tableData = []; 
+
+
+
+    window.onload = async function() {
+
+        // จัดการเปิดคู่มืออัตโนมัติหากหน้าจอใหญ่ (Desktop)
+
+        if(window.innerWidth > 1024) {
+
+            openManual();
+
         }
 
-        tasks.push({
-          id_order: orderId, order_text: foundOrd.order_no, work_code: workCodeText,
-          step_name: stepNameText, id_target: parseInt(targetData.id_target),
-          id_work: parseInt(targetData.id_work), target_amount: targetData.target_amount, total_qty: qty,
-          remark: remarkVal
-        });
-      }
-    });
 
-    if(!isValidTasks || tasks.length === 0) {
-      alert("⚠️ กรุณากรอกเลขออเดอร์ เลือกขั้นตอน และใส่ยอดผลิตให้ถูกต้องทุกช่องที่เพิ่มมาครับ!");
-      return;
-    }
 
-    let taskLoadWeights = tasks.map(task => task.target_amount > 0 ? (task.total_qty / task.target_amount) : 1);
-    let totalLoadWeight = taskLoadWeights.reduce((a, b) => a + b, 0);
+        Swal.fire({ title: 'เชื่อมต่อฐานข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
-    preparedPayload = [];
-    let hasLowEff = false;
-    let previewHtml = '';
 
-    selectedEmployeeList.forEach(emp => {
-      tasks.forEach((task, idx) => {
-        let assignedQty = Math.round(task.total_qty / selectedEmployeeList.length);
-        let proportion = totalLoadWeight > 0 ? (taskLoadWeights[idx] / totalLoadWeight) : (1 / tasks.length);
-        let empAssignedHours = totalHoursPerEmp * proportion;
 
-        let totalTargetForEmp = task.target_amount * empAssignedHours;
-        let eff = totalTargetForEmp > 0 ? (assignedQty / totalTargetForEmp) * 100 : 0;
-        
-        if (eff < 85) { hasLowEff = true; }
-        let effColor = eff >= 85 ? '#10b981' : '#ef4444';
+        try {
 
-        preparedPayload.push({
-          record_date: dateVal, id_order: parseInt(task.id_order), id_work: parseInt(task.id_work),
-          id_target: parseInt(task.id_target), id_name: parseInt(emp.id_name),
-          hour_work: parseFloat(empAssignedHours.toFixed(2)), work_period: workPeriodVal,
-          produced_amount: parseInt(assignedQty), nogoods_amount: 0, 
-          remark: task.remark ? task.remark : `Batch Smart-Allocated`
-        });
+            const [worksRes, stepsRes] = await Promise.all([
 
-        previewHtml += `<tr>
-          <td>${emp.name}</td>
-          <td style="text-align: left; padding-left: 8px;">
-            <b style="color:var(--blue-dark);">[#${task.id_target}]</b> <b>${task.order_text}</b><br>
-            <span style="font-size:11px; color:#6b7280;">ชิ้นงาน: ${task.work_code} | ขั้นตอน: ${task.step_name} (เป้า: ${task.target_amount}/ชม.)</span>
-          </td>
-          <td><span style="background: ${workPeriodVal === 'โอที' ? '#f59e0b' : '#2563eb'}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${workPeriodVal}</span></td>
-          <td>${empAssignedHours.toFixed(2)}</td>
-          <td style="color: #059669; font-weight: bold;">${assignedQty.toLocaleString()}</td>
-          <td style="color: ${effColor}; font-weight: bold;">${eff.toFixed(1)}%</td>
-          <td style="font-size: 11px;">${task.remark || '-'}</td>
-        </tr>`;
-      });
-    });
+                fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
 
-    document.getElementById('previewTbody').innerHTML = previewHtml;
-    document.getElementById('previewSection').style.display = 'block';
+                fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json())
 
-    if (hasLowEff) { document.getElementById('reasonGroup').style.display = 'block'; } 
-    else { document.getElementById('reasonGroup').style.display = 'none'; document.getElementById('id_reason').value = ''; }
+            ]);
 
-    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
-  }
 
-  async function executeBatchSubmit() {
-    if(preparedPayload.length === 0) return;
-    if(!confirm(`ยืนยันการบันทึกข้อมูลชุดนี้ทั้งหมด ${preparedPayload.length} รายการ ใช่หรือไม่?`)) return;
 
-    let reasonVal = document.getElementById('id_reason').value;
-    if (reasonVal) {
-      let parsedReason = parseInt(reasonVal);
-      preparedPayload.forEach(item => { item.id_reason = parsedReason; });
-    }
+            worksRes.sort((a, b) => parseInt(a.id_work) - parseInt(b.id_work));
 
-    const btn = document.getElementById('confirmSubmitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกข้อมูลลงฐานข้อมูล...';
 
-    try {
-      const res = await fetch(SUPABASE_URL + "/daily_production", {
-        method: "POST", headers: headers, body: JSON.stringify(preparedPayload)
-      });
 
-      if(res.ok) {
-        alert("⚡ บันทึกข้อมูลกลุ่มลง Supabase สำเร็จเรียบร้อยแล้ว!");
-        location.reload();
-      } else {
-        const err = await res.json();
-        alert("❌ บันทึกล้มเหลว: " + (err.message || JSON.stringify(err)));
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> ยืนยันบันทึกข้อมูลด้วยความเร็วแสง!';
-      }
-    } catch(err) {
-      alert("⚠️ ข้อผิดพลาด: " + err.message);
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-bolt"></i> ยืนยันบันทึกข้อมูลด้วยความเร็วแสง!';
-    }
-  }
+            const selectWork = document.getElementById('id_work');
 
-  // ==========================================
-  // 📂 ประวัติการทำงาน & ระบบกรองช่วงเวลาและขั้นตอน
-  // ==========================================
-  function toggleFullscreen() {
-    const card = document.getElementById('historyCardContainer');
-    card.classList.toggle('fullscreen-active');
-    const icon = document.getElementById('fs-icon');
-    icon.className = card.classList.contains('fullscreen-active') ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
-  }
+            const filterWork = document.getElementById('filter_work');
 
-  async function loadProductionHistory() {
-    const startDate = document.getElementById('history_date_start').value;
-    const endDate = document.getElementById('history_date_end').value;
-    const selectedStepId = document.getElementById('history_step_filter').value;
-    const tbody = document.getElementById('historyTbody');
+            const selectStep = document.getElementById('id_step');
 
-    if(!startDate || !endDate) {
-      alert("กรุณาระบุช่วงวันที่เริ่มต้นและสิ้นสุดให้ครบถ้วน");
-      return;
-    }
 
-    tbody.innerHTML = `<tr><td colspan="7" style="padding: 15px; color: var(--blue-primary);"><i class="fa-solid fa-spinner fa-spin"></i> กำลังค้นหาข้อมูลประวัติ...</td></tr>`;
 
-    let targetFilterIds = [];
-    if (selectedStepId) {
-      targetFilterIds = globalTargets.filter(t => String(t.id_step) === String(selectedStepId)).map(t => t.id_target);
-    } else {
-      targetFilterIds = globalTargets.map(t => t.id_target);
-    }
+            selectWork.innerHTML = `<option value="">-- เลือกรหัสชิ้นงาน --</option>`;
 
-    if(targetFilterIds.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="padding: 15px; color: var(--text-muted);">ไม่พบเป้าหมายที่ตรงกับขั้นตอนที่เลือก</td></tr>`;
-      return;
-    }
+            filterWork.innerHTML = `<option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>`;
 
-    try {
-      let queryUrl = `${SUPABASE_URL}/daily_production?record_date=gte.${startDate}&record_date=lte.${endDate}&id_target=in.(${targetFilterIds.join(',')})&select=*&order=record_date.desc`;
-      
-      const res = await fetch(queryUrl, { headers });
-      if(!res.ok) throw new Error("ไม่สามารถดึงข้อมูลได้");
-      const logs = await res.json();
+            worksRes.forEach(w => {
 
-      if(logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="padding: 15px; color: var(--text-muted);">ไม่พบประวัติการทำงานในช่วงวันที่เลือก</td></tr>`;
-        return;
-      }
+                refWorks[w.id_work] = w.work_code;
 
-      let html = "";
-      logs.forEach(log => {
-        const emp = globalEmployees.find(e => String(e.id_name) === String(log.id_name));
-        const empName = emp ? emp.name : `ID: ${log.id_name}`;
-        
-        const ord = globalOrders.find(o => String(o.id_order) === String(log.id_order));
-        const ordNo = ord ? ord.order_no : `Order #${log.id_order}`;
+                let optStr = `<option value="${w.id_work}">${w.work_code}</option>`;
 
-        // ค้นหารหัสชิ้นงาน (Work Code) จาก id_work ในตาราง work_items
-        const workItem = globalWorkItems.find(w => String(w.id_work) === String(log.id_work));
-        const workCodeText = workItem ? workItem.work_code : `-`;
+                selectWork.innerHTML += optStr;
 
-        // ค้นหาชื่อขั้นตอนการผลิต
-        const targetObj = globalTargets.find(t => String(t.id_target) === String(log.id_target));
-        let stepNameText = "";
-        if (targetObj) {
-          const stepObj = globalSteps.find(s => String(s.id_step) === String(targetObj.id_step));
-          if (stepObj) stepNameText = stepObj.step_name;
+                filterWork.innerHTML += optStr;
+
+            });
+
+
+
+            selectStep.innerHTML = `<option value="">-- เลือกขั้นตอนการทำงาน --</option>`;
+
+            stepsRes.forEach(s => {
+
+                refSteps[s.id_step] = s.step_name;
+
+                selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
+
+            });
+
+
+
+            await loadTableData();
+
+
+
+            const savedFilterWork = localStorage.getItem('target_filter_work');
+
+            if (savedFilterWork) {
+
+                document.getElementById('filter_work').value = savedFilterWork;
+
+                document.getElementById('id_work').value = savedFilterWork;
+
+                renderTable();
+
+            }
+
+
+
+            Swal.close();
+
+        } catch (error) {
+
+            Swal.fire({icon: 'error', title: 'Error', text: 'เชื่อมต่อฐานข้อมูลล้มเหลว', background: '#082f49', color: 'white'});
+
         }
 
-        html += `<tr id="row-${log.id}">
-          <td class="val-date">${log.record_date}</td>
-          <td class="val-emp" data-val="${log.id_name}" style="text-align: left; padding-left: 6px;">${empName}</td>
-          <td style="text-align: left; padding-left: 6px;">
-            <b style="color: var(--blue-dark);">${workCodeText}</b><br>
-            <span style="font-size: 10px; color: var(--text-muted);">ออเดอร์: ${ordNo} (Target: #${log.id_target} - ${stepNameText})</span>
-          </td>
-          <td>${log.work_period || 'ปกติ'}</td>
-          <td>${log.hour_work}</td>
-          <td class="val-qty" data-val="${log.produced_amount}" style="color: #059669; font-weight: bold;">${log.produced_amount.toLocaleString()}</td>
-          <td>
-            <button class="btn-row-edit" onclick="enableEdit(${log.id})"><i class="fa-solid fa-pen"></i> แก้ไข</button>
-            <button class="btn-row-delete" onclick="deleteSingleRecord(${log.id})"><i class="fa-solid fa-trash"></i> ลบ</button>
-          </td>
-        </tr>`;
-      });
-      tbody.innerHTML = html;
-    } catch(err) {
-      tbody.innerHTML = `<tr><td colspan="7" style="padding: 15px; color: #ef4444;">เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
+    };
+
+
+
+    function onFormWorkChange() {
+
+        const selectedWork = document.getElementById('id_work').value;
+
+        document.getElementById('filter_work').value = selectedWork;
+
+        localStorage.setItem('target_filter_work', selectedWork);
+
+        renderTable();
+
     }
-  }
 
-  function enableEdit(recordId) {
-    const tr = document.getElementById(`row-${recordId}`);
-    const dateCell = tr.querySelector('.val-date');
-    const empCell = tr.querySelector('.val-emp');
-    const qtyCell = tr.querySelector('.val-qty');
 
-    const currentDate = dateCell.innerText.trim();
-    const currentEmp = empCell.getAttribute('data-val');
-    const currentQty = qtyCell.getAttribute('data-val');
 
-    let empOptions = globalEmployees.map(e => `<option value="${e.id_name}" ${e.id_name == currentEmp ? 'selected' : ''}>${e.name}</option>`).join('');
+    function onFilterWorkChange() {
 
-    dateCell.innerHTML = `<input type="date" id="edit-date-${recordId}" value="${currentDate}" style="padding:4px; font-size:11px; width:110px;">`;
-    empCell.innerHTML = `<select id="edit-emp-${recordId}" style="padding:4px; font-size:11px; width:100%; min-width:120px;">${empOptions}</select>`;
-    qtyCell.innerHTML = `<input type="number" id="edit-qty-${recordId}" value="${currentQty}" style="padding:4px; font-size:11px; width:70px;">`;
+        const selectedFilter = document.getElementById('filter_work').value;
 
-    const actionCell = tr.lastElementChild;
-    actionCell.innerHTML = `
-      <button class="btn-row-edit" style="background:#10b981;" onclick="saveRowEdit(${recordId})"><i class="fa-solid fa-save"></i> บันทึก</button>
-      <button class="btn-row-delete" onclick="loadProductionHistory()"><i class="fa-solid fa-times"></i> ยกเลิก</button>
-    `;
-  }
+        document.getElementById('id_work').value = selectedFilter;
 
-  async function saveRowEdit(recordId) {
-    const newDate = document.getElementById(`edit-date-${recordId}`).value;
-    const newEmp = document.getElementById(`edit-emp-${recordId}`).value;
-    const newQty = document.getElementById(`edit-qty-${recordId}`).value;
+        localStorage.setItem('target_filter_work', selectedFilter);
 
-    if(!newDate || !newEmp || !newQty) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+        renderTable();
 
-    try {
-      const res = await fetch(`${SUPABASE_URL}/daily_production?id=eq.${recordId}`, {
-        method: "PATCH", headers: headers,
-        body: JSON.stringify({ record_date: newDate, id_name: parseInt(newEmp), produced_amount: parseInt(newQty) })
-      });
-      if(res.ok) { loadProductionHistory(); } 
-      else { alert("❌ บันทึกไม่สำเร็จ"); }
-    } catch(err) { alert("⚠️ ข้อผิดพลาด: " + err.message); }
-  }
+    }
 
-  async function deleteSingleRecord(recordId) {
-    if(!confirm("⚠️ คุณต้องการลบรายการบันทึกนี้ใช่หรือไม่?")) return;
-    try {
-      const res = await fetch(`${SUPABASE_URL}/daily_production?id=eq.${recordId}`, { method: "DELETE", headers: headers });
-      if(res.ok) { loadProductionHistory(); } 
-      else { alert("❌ ลบไม่สำเร็จ"); }
-    } catch(err) { alert("⚠️ ข้อผิดพลาด: " + err.message); }
-  }
+
+
+    async function saveData() {
+
+        const editIdTarget = document.getElementById('edit_id_target').value;
+
+        const id_work = document.getElementById('id_work').value;
+
+        const id_step = document.getElementById('id_step').value;
+
+        const target_amount = document.getElementById('target_amount').value;
+
+
+
+        if (!id_work || !id_step || !target_amount) {
+
+            Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณากรอกข้อมูลให้ครบถ้วน', background: '#082f49', color: 'white'}); 
+
+            return;
+
+        }
+
+
+
+        const payload = {
+
+            id_work: parseInt(id_work),
+
+            id_step: parseInt(id_step),
+
+            target_amount: parseFloat(target_amount)
+
+        };
+
+
+
+        document.getElementById('btnSave').disabled = true;
+
+
+
+        try {
+
+            let res;
+
+            if (!editIdTarget) {
+
+                res = await fetch(`${BASE_URL}/targets`, {
+
+                    method: 'POST', 
+
+                    headers: { ...headers, 'Prefer': 'return=minimal' }, 
+
+                    body: JSON.stringify(payload)
+
+                });
+
+            } else {
+
+                res = await fetch(`${BASE_URL}/targets?id_target=eq.${editIdTarget}`, {
+
+                    method: 'PATCH', 
+
+                    headers: { ...headers, 'Prefer': 'return=minimal' }, 
+
+                    body: JSON.stringify(payload)
+
+                });
+
+                cancelEdit();
+
+            }
+
+
+
+            if (!res.ok) throw new Error('Transaction Failed');
+
+
+
+            Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
+
+            
+
+            document.getElementById('targetForm').reset();
+
+
+
+            document.getElementById('filter_work').value = id_work;
+
+            localStorage.setItem('target_filter_work', id_work);
+
+            await loadTableDataRaw();
+
+            renderTable();
+
+
+
+        } catch (e) {
+
+            Swal.fire({icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', background: '#082f49', color: 'white'});
+
+        } finally {
+
+            document.getElementById('btnSave').disabled = false;
+
+        }
+
+    }
+
+
+
+    async function loadTableDataRaw() {
+
+        const res = await fetch(`${BASE_URL}/targets?select=*&order=id_target.desc`, { headers });
+
+        tableData = await res.json();
+
+    }
+
+
+
+    async function loadTableData() {
+
+        try {
+
+            await loadTableDataRaw();
+
+            renderTable();
+
+        } catch(e) {
+
+            Swal.fire({icon: 'error', title: 'Error', text: 'ดึงข้อมูลไม่สำเร็จ', background: '#082f49', color: 'white'});
+
+        }
+
+    }
+
+
+
+    function renderTable() {
+
+        const filterVal = document.getElementById('filter_work').value;
+
+        const tbody = document.getElementById('dataTableBody');
+
+        tbody.innerHTML = '';
+
+
+
+        let filtered = tableData;
+
+        if (filterVal) {
+
+            filtered = tableData.filter(row => row.id_work == filterVal);
+
+        }
+
+
+
+        if (filtered.length === 0) {
+
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary" style="padding: 20px;">ไม่พบข้อมูลขั้นตอนสำหรับรหัสชิ้นงานนี้</td></tr>';
+
+            return;
+
+        }
+
+
+
+        filtered.forEach(row => {
+
+            let workCode = refWorks[row.id_work] ? refWorks[row.id_work] : `ID: ${row.id_work}`;
+
+            let stepName = refSteps[row.id_step] ? refSteps[row.id_step] : `ID: ${row.id_step}`;
+
+
+
+            let tr = document.createElement('tr');
+
+            tr.innerHTML = `
+
+                <td class="fw-bold text-center">#${row.id_target}</td>
+
+                <td style="color: #0369a1; font-weight: bold;">${workCode}</td>
+
+                <td style="color: #0f766e;">${stepName}</td>
+
+                <td class="fw-bold" style="color: #047857;">${row.target_amount}</td>
+
+                <td class="text-center">
+
+                    <button class="btn-action btn-edit" onclick="verifyPin(() => triggerEdit(${row.id_target}, ${row.id_work}, ${row.id_step}, ${row.target_amount}))">แก้ไข</button>
+
+                    <button class="btn-action btn-delete" onclick="verifyPin(() => deleteRecord(${row.id_target}))">ลบ</button>
+
+                </td>
+
+            `;
+
+            tbody.appendChild(tr);
+
+        });
+
+    }
+
+
+
+    async function verifyPin(actionCallback) {
+
+        const { value: pin } = await Swal.fire({
+
+            title: '🔒 ยืนยันตัวตน',
+
+            text: 'กรุณาใส่รหัสผ่านเพื่อดำเนินการ',
+
+            input: 'password',
+
+            inputAttributes: { autocapitalize: 'off' },
+
+            showCancelButton: true,
+
+            confirmButtonText: 'ตกลง',
+
+            cancelButtonText: 'ยกเลิก',
+
+            background: '#041421', color: '#7dd3fc',
+
+            customClass: { confirmButton: 'btn btn-cyan', cancelButton: 'btn btn-secondary' }
+
+        });
+
+
+
+        if (pin === '112233') {
+
+            actionCallback();
+
+        } else if (pin !== undefined) {
+
+            Swal.fire({ icon: 'error', title: 'รหัสไม่ถูกต้อง', text: 'คุณไม่มีสิทธิ์ทำรายการนี้', background: '#041421', color: '#fb7185' });
+
+        }
+
+    }
+
+
+
+    function triggerEdit(id_target, id_work, id_step, target_amount) {
+
+        document.getElementById('edit_id_target').value = id_target;
+
+        document.getElementById('id_work').value = id_work;
+
+        onFormWorkChange();
+
+        document.getElementById('id_step').value = id_step;
+
+        document.getElementById('target_amount').value = target_amount;
+
+        
+
+        document.getElementById('btnSave').innerText = '[*] บันทึกการแก้ไข (UPDATE)';
+
+        document.getElementById('btnSave').classList.replace('btn-cyan', 'btn-warning');
+
+        document.getElementById('btnCancelEdit').style.display = 'block';
+
+        
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    }
+
+
+
+    function cancelEdit() {
+
+        document.getElementById('targetForm').reset();
+
+        document.getElementById('edit_id_target').value = '';
+
+        
+
+        document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
+
+        document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
+
+        document.getElementById('btnCancelEdit').style.display = 'none';
+
+        onFormWorkChange();
+
+    }
+
+
+
+   async function deleteRecord(id_target) {
+
+        const confirmDelete = await Swal.fire({
+
+            title: 'ยืนยันการลบ?',
+
+            text: "ข้อมูล Target ID #" + id_target + " จะถูกลบออกจากระบบอย่างถาวร!",
+
+            icon: 'warning',
+
+            showCancelButton: true,
+
+            confirmButtonText: 'ลบทิ้ง',
+
+            cancelButtonText: 'ยกเลิก',
+
+            confirmButtonColor: '#ef4444',
+
+            background: '#041421', color: '#7dd3fc'
+
+        });
+
+
+
+        if (confirmDelete.isConfirmed) {
+
+            try {
+
+                const res = await fetch(`${BASE_URL}/targets?id_target=eq.${id_target}`, {
+
+                    method: 'DELETE', headers: headers
+
+                });
+
+                
+
+                if (res.ok) {
+
+                    Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
+
+                    await loadTableDataRaw();
+
+                    renderTable();
+
+                } else {
+
+                    // ดึงข้อความ Error จากฐานข้อมูล
+
+                    const errData = await res.json().catch(() => ({}));
+
+                    
+
+                    // ดักจับ Error 409 (ติด Foreign Key)
+
+                    if (res.status === 409) {
+
+                        Swal.fire({
+
+                            icon: 'error', 
+
+                            title: 'ลบข้อมูลไม่ได้!', 
+
+                            text: 'เป้าหมายนี้มีการบันทึกยอดผลิตไปแล้ว (ติดประวัติการทำงาน) กรุณาลบประวัติในหน้าบันทึกการผลิตก่อนครับ', 
+
+                            background: '#041421', 
+
+                            color: '#fb7185'
+
+                        });
+
+                    } else {
+
+                        throw new Error(errData.message || 'Delete Failed');
+
+                    }
+
+                }
+
+            } catch (e) {
+
+                Swal.fire({
+
+                    icon: 'error', 
+
+                    title: 'ข้อผิดพลาด', 
+
+                    text: 'ลบข้อมูลไม่สำเร็จ: ' + e.message, 
+
+                    background: '#041421', 
+
+                    color: '#fb7185'
+
+                });
+
+            }
+
+        }
+
+    }
+
+
+
+    // ==============================================
+
+    // โค้ดควบคุมหน้าต่างลอยคู่มือ (Drag, Open, Close)
+
+    // ==============================================
+
+    function openManual() {
+
+        document.getElementById('floatingManual').style.display = 'flex';
+
+        document.body.classList.add('manual-open'); // เลื่อนจอหลักหลบ
+
+    }
+
+
+
+    function closeManual() {
+
+        document.getElementById('floatingManual').style.display = 'none';
+
+        document.body.classList.remove('manual-open'); // คืนค่าจอหลัก
+
+    }
+
+
+
+    dragElement(document.getElementById("floatingManual"));
+
+
+
+    function dragElement(elmnt) {
+
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+        var header = document.getElementById(elmnt.id + "Header");
+
+        
+
+        if (header) {
+
+            header.onmousedown = dragMouseDown;
+
+            header.ontouchstart = dragMouseDown;
+
+        } else {
+
+            elmnt.onmousedown = dragMouseDown;
+
+            elmnt.ontouchstart = dragMouseDown;
+
+        }
+
+
+
+        function dragMouseDown(e) {
+
+            e = e || window.event;
+
+            if (e.type !== "touchstart") e.preventDefault();
+
+            
+
+            let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+
+            let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+
+            
+
+            pos3 = clientX;
+
+            pos4 = clientY;
+
+            
+
+            document.onmouseup = closeDragElement;
+
+            document.onmousemove = elementDrag;
+
+            document.ontouchend = closeDragElement;
+
+            document.ontouchmove = elementDrag;
+
+        }
+
+
+
+        function elementDrag(e) {
+
+            e = e || window.event;
+
+            if (e.type !== "touchmove") e.preventDefault(); 
+
+            
+
+            let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+
+            let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+
+            
+
+            pos1 = pos3 - clientX;
+
+            pos2 = pos4 - clientY;
+
+            pos3 = clientX;
+
+            pos4 = clientY;
+
+            
+
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+
+            elmnt.style.right = 'auto'; 
+
+        }
+
+
+
+        function closeDragElement() {
+
+            document.onmouseup = null;
+
+            document.onmousemove = null;
+
+            document.ontouchend = null;
+
+            document.ontouchmove = null;
+
+        }
+
+    }
+
+
+
+    // ฟังก์ชันสำหรับพิมพ์คู่มือ
+
+    function printManual() {
+
+        const manualHtml = document.getElementById('manualContent').innerHTML;
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+
+        
+
+        printWindow.document.write(`
+
+            <html>
+
+            <head>
+
+                <title>พิมพ์คู่มือ - TARGET STOCK TERMINAL</title>
+
+                <style>
+
+                    body { 
+
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+
+                        color: #000; 
+
+                        padding: 30px; 
+
+                        line-height: 1.6; 
+
+                    }
+
+                    h2 { text-align: center; font-size: 24px; margin-bottom: 20px; }
+
+                    .manual-section-title { 
+
+                        font-size: 18px; 
+
+                        font-weight: bold; 
+
+                        margin-top: 25px; 
+
+                        margin-bottom: 10px; 
+
+                        border-bottom: 2px solid #ccc; 
+
+                        padding-bottom: 5px; 
+
+                        color: #000 !important;
+
+                    }
+
+                    ul, ol { padding-left: 25px; margin-top: 5px; }
+
+                    li { margin-bottom: 10px; font-size: 15px; }
+
+                    strong { color: #000 !important; }
+
+                    span { color: #000 !important; background: transparent !important; padding: 0 !important; font-weight: bold; }
+
+                    @media print {
+
+                        body { padding: 0; }
+
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <h2>📖 คู่มือการใช้งาน TARGET // STOCK TERMINAL</h2>
+
+                ${manualHtml}
+
+            </body>
+
+            </html>
+
+        `);
+
+        
+
+        printWindow.document.close();
+
+        printWindow.focus();
+
+        
+
+        setTimeout(() => {
+
+            printWindow.print();
+
+            printWindow.close();
+
+        }, 300);
+
+    }
+
 </script>
+
 </body>
+
 </html>
