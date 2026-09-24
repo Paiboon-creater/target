@@ -9,6 +9,9 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <!-- Tom Select CSS (สำหรับ Dropdown ค้นหาได้) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    
     <style>
         :root {
             --bg-dark: #041421;
@@ -124,6 +127,44 @@
             border-color: var(--text-cyan);
             box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
             outline: none;
+        }
+
+        /* Tom Select Dark Theme Overrides */
+        .ts-control {
+            background-color: var(--input-bg) !important;
+            border: 1px solid #0e7490 !important;
+            color: var(--text-light-blue) !important;
+            border-radius: 6px !important;
+            padding: 10px 12px !important;
+        }
+        .ts-control.focus {
+            border-color: var(--text-cyan) !important;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.5) !important;
+        }
+        .ts-control > input {
+            color: var(--text-white) !important;
+        }
+        .ts-dropdown {
+            background-color: var(--panel-bg) !important;
+            border: 1px solid var(--border-cyan) !important;
+            color: var(--text-light-blue) !important;
+            border-radius: 0 0 6px 6px !important;
+        }
+        
+        /* เพิ่มให้ความสูงของกล่องรายการยาวที่สุดเท่าที่จอจะแสดงได้ */
+        .ts-dropdown .ts-dropdown-content {
+            max-height: 60vh !important;
+        }
+        
+        .ts-dropdown .option {
+            padding: 8px 12px !important;
+        }
+        .ts-dropdown .option:hover, .ts-dropdown .option.active {
+            background-color: #0e7490 !important;
+            color: var(--text-white) !important;
+        }
+        .ts-control .item {
+            color: var(--text-light-blue) !important;
         }
 
         .btn-cyan { background-color: #0891b2; color: white; font-weight: bold; border: none; }
@@ -284,7 +325,8 @@
 
             <div class="mb-3">
                 <label class="form-label">📊 จำนวนเป้าหมาย (Target Amount)</label>
-                <input type="number" id="target_amount" class="form-control form-control-stock" placeholder="ระบุจำนวนเป้าหมาย..." required>
+                <!-- เพิ่ม onfocus="this.select()" ตรงนี้ เพื่อให้ถมดำอัตโนมัติ -->
+                <input type="number" id="target_amount" class="form-control form-control-stock" placeholder="ระบุจำนวนเป้าหมาย..." required onfocus="this.select()">
             </div>
 
             <div class="d-flex gap-2 mt-2">
@@ -343,7 +385,7 @@
     <div class="floating-body" id="manualContent">
         <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">📝 การเพิ่มข้อมูลเป้าหมายใหม่</div>
         <ol>
-            <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ</li>
+            <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ (พิมพ์ค้นหาได้)</li>
             <li>ที่ช่อง <strong>ขั้นตอนการทำงาน</strong> ให้เลือกขั้นตอนการผลิต กรณีไม่พบ ขั้นตอนที่ต้องการกรุณาติดต่อผู้สร้างระบบฐานข้อมูล</li>
             <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย(ชิ้น/ต่อคน/ต่อชม.)</li>
             <li>กดปุ่ม <strong style="color: #22d3ee;">[+] บันทึกข้อมูล (SAVE)</strong></li>
@@ -375,6 +417,9 @@
     </div>
 </div>
 
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
 <script>
     const BASE_URL = 'https://siiiifesdjuunwmwozfb.supabase.co/rest/v1';
     const SUPABASE_KEY = 'sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT';
@@ -383,13 +428,46 @@
     let refWorks = {};
     let refSteps = {};
     let tableData = []; 
+    
+    // ตัวแปรสำหรับเก็บ Instance ของ Tom Select
+    let tsIdWork, tsFilterWork;
+
+    // การตั้งค่าให้ Tom Select ถมดำข้อความทันทีที่คลิก เพื่อพิมพ์ทับได้ และแสดงรายการทั้งหมด
+    const tomSelectConfig = {
+        create: false,
+        sortField: false,
+        maxOptions: null, // <--- แสดงรายการทั้งหมดโดยไม่จำกัดจำนวน
+        onFocus: function() {
+            if (this.items.length > 0) {
+                this.lastValue = this.items[0]; 
+                let currentText = this.options[this.lastValue].text;
+                this.clear(true); 
+                this.setTextboxValue(currentText); 
+                setTimeout(() => { 
+                    this.control_input.select(); 
+                    try { this.control_input.setSelectionRange(0, 9999); } catch(e){} // เผื่อสำหรับบางเบราว์เซอร์
+                }, 50);
+            } else {
+                this.lastValue = null;
+            }
+        },
+        onBlur: function() {
+            let typedText = this.control_input.value;
+            if (this.items.length === 0) {
+                let match = Object.values(this.options).find(o => o.text === typedText);
+                if (match) {
+                    this.setValue(match.value, true);
+                } else if (this.lastValue) {
+                    // หากพิมพ์ผิดแล้วคลิกออก ให้ดึงค่าเก่ากลับมา
+                    this.setValue(this.lastValue, true);
+                }
+            }
+            this.setTextboxValue(''); 
+        }
+    };
 
     window.onload = async function() {
-        // จัดการเปิดคู่มืออัตโนมัติหากหน้าจอใหญ่ (Desktop)
-        if(window.innerWidth > 1024) {
-            openManual();
-        }
-
+        // เอาคำสั่งเปิดคูมืออัตโนมัติออกไปแล้วครับ
         Swal.fire({ title: 'เชื่อมต่อฐานข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
         try {
@@ -398,7 +476,11 @@
                 fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json())
             ]);
 
-            worksRes.sort((a, b) => parseInt(a.id_work) - parseInt(b.id_work));
+            worksRes.sort((a, b) => {
+                let codeA = String(a.work_code || '');
+                let codeB = String(b.work_code || '');
+                return codeA.localeCompare(codeB, 'th', { numeric: true });
+            });
 
             const selectWork = document.getElementById('id_work');
             const filterWork = document.getElementById('filter_work');
@@ -419,12 +501,16 @@
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
+            // เปิดใช้งาน Tom Select พร้อมฟังก์ชันถมดำ
+            tsIdWork = new TomSelect('#id_work', tomSelectConfig);
+            tsFilterWork = new TomSelect('#filter_work', tomSelectConfig);
+
             await loadTableData();
 
             const savedFilterWork = localStorage.getItem('target_filter_work');
             if (savedFilterWork) {
-                document.getElementById('filter_work').value = savedFilterWork;
-                document.getElementById('id_work').value = savedFilterWork;
+                tsFilterWork.setValue(savedFilterWork, true);
+                tsIdWork.setValue(savedFilterWork, true);
                 renderTable();
             }
 
@@ -436,16 +522,20 @@
 
     function onFormWorkChange() {
         const selectedWork = document.getElementById('id_work').value;
-        document.getElementById('filter_work').value = selectedWork;
-        localStorage.setItem('target_filter_work', selectedWork);
-        renderTable();
+        if (selectedWork) {
+            tsFilterWork.setValue(selectedWork, true); 
+            localStorage.setItem('target_filter_work', selectedWork);
+            renderTable();
+        }
     }
 
     function onFilterWorkChange() {
         const selectedFilter = document.getElementById('filter_work').value;
-        document.getElementById('id_work').value = selectedFilter;
-        localStorage.setItem('target_filter_work', selectedFilter);
-        renderTable();
+        if (selectedFilter) {
+            tsIdWork.setValue(selectedFilter, true);
+            localStorage.setItem('target_filter_work', selectedFilter);
+            renderTable();
+        }
     }
 
     async function saveData() {
@@ -489,8 +579,9 @@
             Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
             
             document.getElementById('targetForm').reset();
+            tsIdWork.setValue('', true); // เคลียร์ช่องค้นหา
 
-            document.getElementById('filter_work').value = id_work;
+            tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
             await loadTableDataRaw();
             renderTable();
@@ -572,7 +663,7 @@
 
     function triggerEdit(id_target, id_work, id_step, target_amount) {
         document.getElementById('edit_id_target').value = id_target;
-        document.getElementById('id_work').value = id_work;
+        tsIdWork.setValue(id_work, true); 
         onFormWorkChange();
         document.getElementById('id_step').value = id_step;
         document.getElementById('target_amount').value = target_amount;
@@ -587,6 +678,7 @@
     function cancelEdit() {
         document.getElementById('targetForm').reset();
         document.getElementById('edit_id_target').value = '';
+        tsIdWork.setValue('', true); 
         
         document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
         document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
@@ -617,10 +709,8 @@
                     await loadTableDataRaw();
                     renderTable();
                 } else {
-                    // ดึงข้อความ Error จากฐานข้อมูล
                     const errData = await res.json().catch(() => ({}));
                     
-                    // ดักจับ Error 409 (ติด Foreign Key)
                     if (res.status === 409) {
                         Swal.fire({
                             icon: 'error', 
@@ -650,12 +740,12 @@
     // ==============================================
     function openManual() {
         document.getElementById('floatingManual').style.display = 'flex';
-        document.body.classList.add('manual-open'); // เลื่อนจอหลักหลบ
+        document.body.classList.add('manual-open'); 
     }
 
     function closeManual() {
         document.getElementById('floatingManual').style.display = 'none';
-        document.body.classList.remove('manual-open'); // คืนค่าจอหลัก
+        document.body.classList.remove('manual-open'); 
     }
 
     dragElement(document.getElementById("floatingManual"));
@@ -713,7 +803,6 @@
         }
     }
 
-    // ฟังก์ชันสำหรับพิมพ์คู่มือ
     function printManual() {
         const manualHtml = document.getElementById('manualContent').innerHTML;
         const printWindow = window.open('', '_blank', 'width=800,height=600');
