@@ -426,7 +426,6 @@
     let tsIdWork, tsFilterWork;
 
     window.onload = async function() {
-        // จัดการเปิดคู่มืออัตโนมัติหากหน้าจอใหญ่ (Desktop)
         if(window.innerWidth > 1024) {
             openManual();
         }
@@ -436,15 +435,19 @@
         try {
             const [worksRes, stepsRes] = await Promise.all([
                 fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
-                fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json())
+                // ดึงข้อมูล level มาด้วยเพื่อใช้เรียงลำดับ
+                fetch(`${BASE_URL}/production_steps?select=id_step,step_name,level`, { headers }).then(r => r.json())
             ]);
 
-            // เรียงลำดับ Work Code จากน้อยไปมาก อิงตามตัวอักษรและตัวเลข
+            // เรียงลำดับ Work Code จากน้อยไปมาก
             worksRes.sort((a, b) => {
                 let codeA = String(a.work_code || '');
                 let codeB = String(b.work_code || '');
                 return codeA.localeCompare(codeB, 'th', { numeric: true });
             });
+            
+            // เรียงลำดับ Step Name จาก level น้อยไปมาก สำหรับใช้ใน Dropdown
+            stepsRes.sort((a, b) => (a.level || 0) - (b.level || 0));
 
             const selectWork = document.getElementById('id_work');
             const filterWork = document.getElementById('filter_work');
@@ -461,14 +464,15 @@
 
             selectStep.innerHTML = `<option value="">-- เลือกขั้นตอนการทำงาน --</option>`;
             stepsRes.forEach(s => {
-                refSteps[s.id_step] = s.step_name;
+                // เก็บค่า level เอาไว้ใช้ตอนจัดเรียงตารางด้านล่างด้วย
+                refSteps[s.id_step] = { name: s.step_name, level: s.level || 0 };
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
             // เปิดใช้งาน Tom Select สำหรับการค้นหา
             tsIdWork = new TomSelect('#id_work', {
                 create: false,
-                sortField: false // ไม่ต้องให้มันเรียงซ้ำ เพราะเราเรียงมาจาก Array แล้ว
+                sortField: false 
             });
             tsFilterWork = new TomSelect('#filter_work', {
                 create: false,
@@ -492,7 +496,7 @@
 
     function onFormWorkChange() {
         const selectedWork = document.getElementById('id_work').value;
-        tsFilterWork.setValue(selectedWork, true); // true = อัปเดตแบบเงียบๆ ไม่ให้เกิด Event วนลูป
+        tsFilterWork.setValue(selectedWork, true);
         localStorage.setItem('target_filter_work', selectedWork);
         renderTable();
     }
@@ -588,9 +592,16 @@
             return;
         }
 
+        // เรียงลำดับข้อมูลในตารางตาม level จากน้อยไปมาก
+        filtered.sort((a, b) => {
+            let levelA = refSteps[a.id_step] ? refSteps[a.id_step].level : 999;
+            let levelB = refSteps[b.id_step] ? refSteps[b.id_step].level : 999;
+            return levelA - levelB;
+        });
+
         filtered.forEach(row => {
             let workCode = refWorks[row.id_work] ? refWorks[row.id_work] : `ID: ${row.id_work}`;
-            let stepName = refSteps[row.id_step] ? refSteps[row.id_step] : `ID: ${row.id_step}`;
+            let stepName = refSteps[row.id_step] ? refSteps[row.id_step].name : `ID: ${row.id_step}`;
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
@@ -629,7 +640,7 @@
 
     function triggerEdit(id_target, id_work, id_step, target_amount) {
         document.getElementById('edit_id_target').value = id_target;
-        tsIdWork.setValue(id_work, true); // เปลี่ยนค่าในช่องค้นหา
+        tsIdWork.setValue(id_work, true); 
         onFormWorkChange();
         document.getElementById('id_step').value = id_step;
         document.getElementById('target_amount').value = target_amount;
@@ -644,7 +655,7 @@
     function cancelEdit() {
         document.getElementById('targetForm').reset();
         document.getElementById('edit_id_target').value = '';
-        tsIdWork.setValue('', true); // เคลียร์ค่า
+        tsIdWork.setValue('', true); 
         
         document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
         document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
@@ -675,10 +686,8 @@
                     await loadTableDataRaw();
                     renderTable();
                 } else {
-                    // ดึงข้อความ Error จากฐานข้อมูล
                     const errData = await res.json().catch(() => ({}));
                     
-                    // ดักจับ Error 409 (ติด Foreign Key)
                     if (res.status === 409) {
                         Swal.fire({
                             icon: 'error', 
@@ -708,12 +717,12 @@
     // ==============================================
     function openManual() {
         document.getElementById('floatingManual').style.display = 'flex';
-        document.body.classList.add('manual-open'); // เลื่อนจอหลักหลบ
+        document.body.classList.add('manual-open'); 
     }
 
     function closeManual() {
         document.getElementById('floatingManual').style.display = 'none';
-        document.body.classList.remove('manual-open'); // คืนค่าจอหลัก
+        document.body.classList.remove('manual-open'); 
     }
 
     dragElement(document.getElementById("floatingManual"));
@@ -771,7 +780,6 @@
         }
     }
 
-    // ฟังก์ชันสำหรับพิมพ์คู่มือ
     function printManual() {
         const manualHtml = document.getElementById('manualContent').innerHTML;
         const printWindow = window.open('', '_blank', 'width=800,height=600');
