@@ -339,9 +339,9 @@
 
             <div class="filter-box d-flex justify-content-between align-items-end flex-wrap gap-2">
                 <div style="flex: 1; min-width: 250px;">
-                    <label class="form-label mb-1" style="color: var(--text-light-blue); font-size:0.85rem;">🔍 กรองตรวจสอบตามรหัสชิ้นงาน (Realtime Filter)</label>
+                    <label class="form-label mb-1" style="color: var(--text-light-blue); font-size:0.85rem;">🔍 กรองตรวจสอบตามรหัสชิ้นงาน (ประหยัดโควตาการดึงข้อมูล)</label>
                     <select id="filter_work" class="form-select form-select-stock" onchange="onFilterWorkChange()">
-                        <option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>
+                        <option value="all">-- แสดงทั้งหมดทุกชิ้นงาน --</option>
                     </select>
                 </div>
             </div>
@@ -435,7 +435,6 @@
         try {
             const [worksRes, stepsRes] = await Promise.all([
                 fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
-                // ดึงข้อมูล level มาด้วยเพื่อใช้เรียงลำดับ
                 fetch(`${BASE_URL}/production_steps?select=id_step,step_name,level`, { headers }).then(r => r.json())
             ]);
 
@@ -454,7 +453,7 @@
             const selectStep = document.getElementById('id_step');
 
             selectWork.innerHTML = `<option value="">-- เลือกรหัสชิ้นงาน --</option>`;
-            filterWork.innerHTML = `<option value="">-- แสดงทั้งหมดทุกชิ้นงาน --</option>`;
+            filterWork.innerHTML = `<option value="all">-- แสดงทั้งหมดทุกชิ้นงาน --</option>`;
             worksRes.forEach(w => {
                 refWorks[w.id_work] = w.work_code;
                 let optStr = `<option value="${w.id_work}">${w.work_code}</option>`;
@@ -469,24 +468,26 @@
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
-            // เปิดใช้งาน Tom Select สำหรับการค้นหา
-            tsIdWork = new TomSelect('#id_work', {
-                create: false,
-                sortField: false 
-            });
-            tsFilterWork = new TomSelect('#filter_work', {
-                create: false,
-                sortField: false
-            });
+            // เปิดใช้งาน Tom Select
+            tsIdWork = new TomSelect('#id_work', { create: false, sortField: false });
+            tsFilterWork = new TomSelect('#filter_work', { create: false, sortField: false });
 
-            await loadTableData();
-
-            const savedFilterWork = localStorage.getItem('target_filter_work');
-            if (savedFilterWork) {
+            // ดึงข้อมูลรหัสชิ้นงานที่เลือกล่าสุด หรือถ้าไม่มีเลยให้เอาตัวแรกสุดของตารางมาตั้งแทน เพื่อลดโควตาการดึงข้อมูลทั้งหมด
+            let savedFilterWork = localStorage.getItem('target_filter_work');
+            if (savedFilterWork && (refWorks[savedFilterWork] || savedFilterWork === 'all')) {
+                tsFilterWork.setValue(savedFilterWork, true);
+                if (savedFilterWork !== 'all') {
+                    tsIdWork.setValue(savedFilterWork, true);
+                }
+            } else if (worksRes.length > 0) {
+                // ครั้งแรกที่เปิดใช้งาน จะบังคับให้กรองที่ชิ้นงานแรกสุดก่อน เพื่อป้องกันการโหลดข้อมูลทั้งหมด
+                savedFilterWork = worksRes[0].id_work;
                 tsFilterWork.setValue(savedFilterWork, true);
                 tsIdWork.setValue(savedFilterWork, true);
-                renderTable();
+                localStorage.setItem('target_filter_work', savedFilterWork);
             }
+
+            await loadTableData();
 
             Swal.close();
         } catch (error) {
@@ -496,16 +497,20 @@
 
     function onFormWorkChange() {
         const selectedWork = document.getElementById('id_work').value;
-        tsFilterWork.setValue(selectedWork, true);
-        localStorage.setItem('target_filter_work', selectedWork);
-        renderTable();
+        if (selectedWork) {
+            tsFilterWork.setValue(selectedWork, true);
+            localStorage.setItem('target_filter_work', selectedWork);
+            loadTableData(); // Trigger network fetch ที่กรองมาแล้ว
+        }
     }
 
     function onFilterWorkChange() {
         const selectedFilter = document.getElementById('filter_work').value;
-        tsIdWork.setValue(selectedFilter, true);
+        if (selectedFilter && selectedFilter !== 'all') {
+            tsIdWork.setValue(selectedFilter, true);
+        }
         localStorage.setItem('target_filter_work', selectedFilter);
-        renderTable();
+        loadTableData(); // Trigger network fetch ที่กรองมาแล้ว
     }
 
     async function saveData() {
@@ -549,12 +554,13 @@
             Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
             
             document.getElementById('targetForm').reset();
-            tsIdWork.setValue('', true); // เคลียร์ช่องค้นหา
+            tsIdWork.setValue('', true); // เคลียร์ช่องค้นหาฟอร์มบน
 
+            // จัดการอัปเดตช่องตัวกรองด้านล่างให้ตรงกับตัวที่เพิ่งเซฟไป
             tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
-            await loadTableDataRaw();
-            renderTable();
+            
+            await loadTableData(); // โหลดใหม่เฉพาะรหัสชิ้นงานที่เกี่ยวข้อง
 
         } catch (e) {
             Swal.fire({icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', background: '#082f49', color: 'white'});
@@ -563,14 +569,26 @@
         }
     }
 
-    async function loadTableDataRaw() {
-        const res = await fetch(`${BASE_URL}/targets?select=*&order=id_target.desc`, { headers });
+    // ฟังก์ชันนี้ถูกปรับให้ส่งพารามิเตอร์ไปยังฐานข้อมูลโดยตรง (ประหยัด Read Quota)
+    async function loadTableDataRaw(workId) {
+        let url = `${BASE_URL}/targets?select=*&order=id_target.desc`;
+        
+        // ถ้าระบุชิ้นงาน และไม่ได้สั่งแสดงทั้งหมด ให้สั่งกรองที่ฐานข้อมูลก่อนดึงกลับมา
+        if (workId && workId !== 'all') {
+            url = `${BASE_URL}/targets?id_work=eq.${workId}&select=*&order=id_target.desc`;
+        }
+        
+        const res = await fetch(url, { headers });
         tableData = await res.json();
     }
 
     async function loadTableData() {
+        const filterVal = document.getElementById('filter_work').value;
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="padding: 20px;">กำลังดึงข้อมูล...</td></tr>';
+        
         try {
-            await loadTableDataRaw();
+            await loadTableDataRaw(filterVal);
             renderTable();
         } catch(e) {
             Swal.fire({icon: 'error', title: 'Error', text: 'ดึงข้อมูลไม่สำเร็จ', background: '#082f49', color: 'white'});
@@ -578,28 +596,22 @@
     }
 
     function renderTable() {
-        const filterVal = document.getElementById('filter_work').value;
         const tbody = document.getElementById('dataTableBody');
         tbody.innerHTML = '';
 
-        let filtered = tableData;
-        if (filterVal) {
-            filtered = tableData.filter(row => row.id_work == filterVal);
-        }
-
-        if (filtered.length === 0) {
+        if (tableData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary" style="padding: 20px;">ไม่พบข้อมูลขั้นตอนสำหรับรหัสชิ้นงานนี้</td></tr>';
             return;
         }
 
-        // เรียงลำดับข้อมูลในตารางตาม level จากน้อยไปมาก
-        filtered.sort((a, b) => {
+        // ข้อมูลถูกดึงมาจากฐานข้อมูลเฉพาะที่ต้องการแล้ว นำมาเรียงลำดับตาม level ต่อได้เลย
+        tableData.sort((a, b) => {
             let levelA = refSteps[a.id_step] ? refSteps[a.id_step].level : 999;
             let levelB = refSteps[b.id_step] ? refSteps[b.id_step].level : 999;
             return levelA - levelB;
         });
 
-        filtered.forEach(row => {
+        tableData.forEach(row => {
             let workCode = refWorks[row.id_work] ? refWorks[row.id_work] : `ID: ${row.id_work}`;
             let stepName = refSteps[row.id_step] ? refSteps[row.id_step].name : `ID: ${row.id_step}`;
 
@@ -641,7 +653,14 @@
     function triggerEdit(id_target, id_work, id_step, target_amount) {
         document.getElementById('edit_id_target').value = id_target;
         tsIdWork.setValue(id_work, true); 
-        onFormWorkChange();
+        
+        // เปลี่ยน Filter ตารางด้านล่างให้ตรงกับตัวที่เลือกมาแก้ทันที
+        if (id_work) {
+            tsFilterWork.setValue(id_work, true);
+            localStorage.setItem('target_filter_work', id_work);
+            loadTableData();
+        }
+        
         document.getElementById('id_step').value = id_step;
         document.getElementById('target_amount').value = target_amount;
         
@@ -660,7 +679,12 @@
         document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
         document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
         document.getElementById('btnCancelEdit').style.display = 'none';
-        onFormWorkChange();
+        
+        // ดึงค่าล่าสุดมาตั้งให้ form เหมือนเดิมเพื่อหลีกเลี่ยงตารางโหลดทั้งหมด
+        let savedFilterWork = localStorage.getItem('target_filter_work');
+        if (savedFilterWork && savedFilterWork !== 'all') {
+            tsIdWork.setValue(savedFilterWork, true);
+        }
     }
 
    async function deleteRecord(id_target) {
@@ -683,8 +707,7 @@
                 
                 if (res.ok) {
                     Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
-                    await loadTableDataRaw();
-                    renderTable();
+                    await loadTableData();
                 } else {
                     const errData = await res.json().catch(() => ({}));
                     
