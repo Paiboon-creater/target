@@ -35,7 +35,6 @@
             transition: padding-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* คลาสสำหรับขยับหน้าจอหลักหลบคู่มือด้านซ้าย */
         @media (min-width: 1024px) {
             body.manual-open {
                 padding-left: 360px;
@@ -194,9 +193,6 @@
         .btn-edit { background-color: #f59e0b; color: white; border: none; margin-right: 4px; }
         .btn-delete { background-color: #ef4444; color: white; border: none; }
 
-        /* ==============================================
-           CSS สำหรับหน้าต่างคู่มือแบบลอยจัดด้านซ้าย
-        =============================================== */
         .floating-window {
             position: fixed;
             top: 15px;
@@ -334,7 +330,10 @@
         <div class="table-wrapper">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h5 style="color: var(--table-text-dark); font-weight: bold; margin:0;">ตารางตรวจสอบข้อมูลเป้าหมาย (Targets Matrix)</h5>
-                <button class="btn btn-sm btn-primary fw-bold" onclick="loadTableData()">รีเฟรชข้อมูล</button>
+                <div>
+                    <button class="btn btn-sm fw-bold me-2" onclick="copyTargets()" style="background-color: #0ea5e9; color: white; border: none;">🗐 คัดลอก/เพิ่ม ขั้นตอน</button>
+                    <button class="btn btn-sm btn-primary fw-bold" onclick="loadTableData()">รีเฟรชข้อมูล</button>
+                </div>
             </div>
 
             <div class="filter-box d-flex justify-content-between align-items-end flex-wrap gap-2">
@@ -366,9 +365,7 @@
     </div>
 </div>
 
-<!-- ==============================================
-     หน้าต่างคู่มือแบบลอย (วางซ้ายมือ ลากย่อขยายได้)
-=============================================== -->
+<!-- หน้าต่างคู่มือแบบลอย -->
 <div id="floatingManual" class="floating-window">
     <div class="floating-header" id="floatingManualHeader">
         <span style="font-size: 0.95rem;">📖 คู่มือการใช้งาน (ลาก/ย่อขยายได้)</span>
@@ -383,6 +380,13 @@
             <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย(ชิ้น/ต่อคน/ต่อชม.)</li>
             <li>กดปุ่ม <strong style="color: #22d3ee;">[+] บันทึกข้อมูล (SAVE)</strong></li>
         </ol>
+
+        <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">🗐 การคัดลอกเพิ่มขั้นตอน (Copy)</div>
+        <ul>
+            <li>เปิดชิ้นงานต้นฉบับที่ตารางด้านล่าง จากนั้นกดปุ่ม <strong>[🗐 คัดลอก/เพิ่ม ขั้นตอน]</strong></li>
+            <li>เลือกรหัสชิ้นงานปลายทางที่ต้องการนำเข้าข้อมูล</li>
+            <li>ระบบจะตรวจสอบข้อมูล หากปลายทางมีข้อมูลอยู่แล้ว จะนำเข้าเฉพาะ "ขั้นตอนใหม่" ที่ยังไม่มีในงานปลายทางให้แบบอัตโนมัติ (ไม่ลบข้อมูลเดิม)</li>
+        </ul>
 
         <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">🔍 การกรองข้อมูล</div>
         <ul>
@@ -438,14 +442,12 @@
                 fetch(`${BASE_URL}/production_steps?select=id_step,step_name,level`, { headers }).then(r => r.json())
             ]);
 
-            // เรียงลำดับ Work Code จากน้อยไปมาก
             worksRes.sort((a, b) => {
                 let codeA = String(a.work_code || '');
                 let codeB = String(b.work_code || '');
                 return codeA.localeCompare(codeB, 'th', { numeric: true });
             });
             
-            // เรียงลำดับ Step Name จาก level น้อยไปมาก สำหรับใช้ใน Dropdown
             stepsRes.sort((a, b) => (a.level || 0) - (b.level || 0));
 
             const selectWork = document.getElementById('id_work');
@@ -463,16 +465,13 @@
 
             selectStep.innerHTML = `<option value="">-- เลือกขั้นตอนการทำงาน --</option>`;
             stepsRes.forEach(s => {
-                // เก็บค่า level เอาไว้ใช้ตอนจัดเรียงตารางด้านล่างด้วย
                 refSteps[s.id_step] = { name: s.step_name, level: s.level || 0 };
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
-            // เปิดใช้งาน Tom Select
             tsIdWork = new TomSelect('#id_work', { create: false, sortField: false });
             tsFilterWork = new TomSelect('#filter_work', { create: false, sortField: false });
 
-            // ดึงข้อมูลรหัสชิ้นงานที่เลือกล่าสุด หรือถ้าไม่มีเลยให้เอาตัวแรกสุดของตารางมาตั้งแทน เพื่อลดโควตาการดึงข้อมูลทั้งหมด
             let savedFilterWork = localStorage.getItem('target_filter_work');
             if (savedFilterWork && (refWorks[savedFilterWork] || savedFilterWork === 'all')) {
                 tsFilterWork.setValue(savedFilterWork, true);
@@ -480,7 +479,6 @@
                     tsIdWork.setValue(savedFilterWork, true);
                 }
             } else if (worksRes.length > 0) {
-                // ครั้งแรกที่เปิดใช้งาน จะบังคับให้กรองที่ชิ้นงานแรกสุดก่อน เพื่อป้องกันการโหลดข้อมูลทั้งหมด
                 savedFilterWork = worksRes[0].id_work;
                 tsFilterWork.setValue(savedFilterWork, true);
                 tsIdWork.setValue(savedFilterWork, true);
@@ -500,7 +498,7 @@
         if (selectedWork) {
             tsFilterWork.setValue(selectedWork, true);
             localStorage.setItem('target_filter_work', selectedWork);
-            loadTableData(); // Trigger network fetch ที่กรองมาแล้ว
+            loadTableData();
         }
     }
 
@@ -510,7 +508,7 @@
             tsIdWork.setValue(selectedFilter, true);
         }
         localStorage.setItem('target_filter_work', selectedFilter);
-        loadTableData(); // Trigger network fetch ที่กรองมาแล้ว
+        loadTableData(); 
     }
 
     async function saveData() {
@@ -554,13 +552,12 @@
             Swal.fire({icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
             
             document.getElementById('targetForm').reset();
-            tsIdWork.setValue('', true); // เคลียร์ช่องค้นหาฟอร์มบน
+            tsIdWork.setValue('', true); 
 
-            // จัดการอัปเดตช่องตัวกรองด้านล่างให้ตรงกับตัวที่เพิ่งเซฟไป
             tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
             
-            await loadTableData(); // โหลดใหม่เฉพาะรหัสชิ้นงานที่เกี่ยวข้อง
+            await loadTableData(); 
 
         } catch (e) {
             Swal.fire({icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', background: '#082f49', color: 'white'});
@@ -569,11 +566,9 @@
         }
     }
 
-    // ฟังก์ชันนี้ถูกปรับให้ส่งพารามิเตอร์ไปยังฐานข้อมูลโดยตรง (ประหยัด Read Quota)
     async function loadTableDataRaw(workId) {
         let url = `${BASE_URL}/targets?select=*&order=id_target.desc`;
         
-        // ถ้าระบุชิ้นงาน และไม่ได้สั่งแสดงทั้งหมด ให้สั่งกรองที่ฐานข้อมูลก่อนดึงกลับมา
         if (workId && workId !== 'all') {
             url = `${BASE_URL}/targets?id_work=eq.${workId}&select=*&order=id_target.desc`;
         }
@@ -604,7 +599,6 @@
             return;
         }
 
-        // ข้อมูลถูกดึงมาจากฐานข้อมูลเฉพาะที่ต้องการแล้ว นำมาเรียงลำดับตาม level ต่อได้เลย
         tableData.sort((a, b) => {
             let levelA = refSteps[a.id_step] ? refSteps[a.id_step].level : 999;
             let levelB = refSteps[b.id_step] ? refSteps[b.id_step].level : 999;
@@ -628,6 +622,106 @@
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    // ฟังก์ชันคัดลอกและเพิ่มเติมข้อมูลเฉพาะส่วนที่แตกต่าง
+    async function copyTargets() {
+        const sourceWorkId = document.getElementById('filter_work').value;
+        
+        if (!sourceWorkId || sourceWorkId === 'all') {
+            Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกรหัสชิ้นงานต้นทางในช่องกรองข้อมูลก่อนคัดลอก', background: '#082f49', color: 'white'});
+            return;
+        }
+
+        let optionsHtml = '<select id="swal-dest-work" class="form-select form-select-stock" style="background-color: #021a2c; color: #7dd3fc; border: 1px solid #0e7490;">';
+        optionsHtml += '<option value="">-- เลือกรหัสชิ้นงานปลายทาง --</option>';
+        for (let id in refWorks) {
+            if (id !== sourceWorkId) { 
+                optionsHtml += `<option value="${id}">${refWorks[id]}</option>`;
+            }
+        }
+        optionsHtml += '</select>';
+
+        const { value: destWorkId, isConfirmed } = await Swal.fire({
+            title: '🗐 คัดลอก/เพิ่มขั้นตอน',
+            html: `<div class="text-start mb-2" style="color: #7dd3fc; font-size: 0.9rem;">คัดลอกจากต้นทาง: <b>${refWorks[sourceWorkId]}</b><br>เพิ่มเติมไปยังปลายทาง:</div>${optionsHtml}`,
+            background: '#041421',
+            color: '#7dd3fc',
+            showCancelButton: true,
+            confirmButtonText: 'ถัดไป ➔',
+            cancelButtonText: 'ยกเลิก',
+            customClass: { confirmButton: 'btn btn-cyan', cancelButton: 'btn btn-secondary' },
+            preConfirm: () => {
+                const val = document.getElementById('swal-dest-work').value;
+                if (!val) Swal.showValidationMessage('กรุณาเลือกรหัสชิ้นงานปลายทาง');
+                return val;
+            }
+        });
+
+        if (isConfirmed && destWorkId) {
+            verifyPin(async () => {
+                Swal.fire({ title: 'กำลังตรวจสอบข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                
+                try {
+                    // 1. ดึงข้อมูลขั้นตอนของชิ้นงานต้นทาง
+                    const resSource = await fetch(`${BASE_URL}/targets?id_work=eq.${sourceWorkId}`, { headers });
+                    const sourceData = await resSource.json();
+
+                    if (sourceData.length === 0) {
+                        Swal.fire({icon: 'info', title: 'ไม่พบข้อมูล', text: 'ไม่มีข้อมูลขั้นตอนในชิ้นงานต้นทางให้คัดลอก', background: '#082f49', color: 'white'});
+                        return;
+                    }
+
+                    // 2. ดึงข้อมูลที่ชิ้นงานปลายทางมีอยู่แล้ว
+                    const resDest = await fetch(`${BASE_URL}/targets?id_work=eq.${destWorkId}&select=id_step`, { headers });
+                    const destData = await resDest.json();
+                    
+                    // สร้าง Array เก็บเฉพาะ ID ของขั้นตอนที่มีในปลายทางแล้ว
+                    const destStepIds = destData.map(item => item.id_step);
+
+                    // 3. กรองข้อมูลเอาเฉพาะ "ขั้นตอนที่ยังไม่มีในปลายทาง" (ส่วนที่แตกต่าง)
+                    const newStepsToInsert = sourceData.filter(item => !destStepIds.includes(item.id_step));
+
+                    if (newStepsToInsert.length === 0) {
+                        Swal.fire({
+                            icon: 'info', 
+                            title: 'ไม่มีรายการใหม่ให้เพิ่ม', 
+                            text: 'ขั้นตอนทั้งหมดจากต้นทาง มีอยู่ในชิ้นงานปลายทางครบอยู่แล้วครับ', 
+                            background: '#082f49', color: 'white'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({ title: `กำลังเพิ่ม ${newStepsToInsert.length} รายการใหม่...`, background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                    // 4. เตรียมข้อมูลเฉพาะตัวใหม่ส่งไปเซฟ
+                    const payload = newStepsToInsert.map(item => ({
+                        id_work: parseInt(destWorkId),
+                        id_step: item.id_step,
+                        target_amount: item.target_amount
+                    }));
+
+                    const insertRes = await fetch(`${BASE_URL}/targets`, {
+                        method: 'POST',
+                        headers: { ...headers, 'Prefer': 'return=minimal' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!insertRes.ok) throw new Error('บันทึกข้อมูลไม่สำเร็จ');
+
+                    Swal.fire({icon: 'success', title: 'เพิ่มข้อมูลสำเร็จ!', text: `เพิ่มเติมขั้นตอนใหม่ไปทั้งหมด ${newStepsToInsert.length} รายการ`, timer: 2000, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
+                    
+                    // สลับไปดูงานที่เพิ่งคัดลอกใส่ทันที
+                    tsFilterWork.setValue(destWorkId, true);
+                    tsIdWork.setValue(destWorkId, true);
+                    localStorage.setItem('target_filter_work', destWorkId);
+                    await loadTableData();
+
+                } catch (error) {
+                    Swal.fire({icon: 'error', title: 'ผิดพลาด', text: error.message, background: '#082f49', color: '#fb7185'});
+                }
+            });
+        }
     }
 
     async function verifyPin(actionCallback) {
@@ -654,7 +748,6 @@
         document.getElementById('edit_id_target').value = id_target;
         tsIdWork.setValue(id_work, true); 
         
-        // เปลี่ยน Filter ตารางด้านล่างให้ตรงกับตัวที่เลือกมาแก้ทันที
         if (id_work) {
             tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
@@ -680,7 +773,6 @@
         document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
         document.getElementById('btnCancelEdit').style.display = 'none';
         
-        // ดึงค่าล่าสุดมาตั้งให้ form เหมือนเดิมเพื่อหลีกเลี่ยงตารางโหลดทั้งหมด
         let savedFilterWork = localStorage.getItem('target_filter_work');
         if (savedFilterWork && savedFilterWork !== 'all') {
             tsIdWork.setValue(savedFilterWork, true);
@@ -710,7 +802,6 @@
                     await loadTableData();
                 } else {
                     const errData = await res.json().catch(() => ({}));
-                    
                     if (res.status === 409) {
                         Swal.fire({
                             icon: 'error', 
@@ -735,9 +826,6 @@
         }
     }
 
-    // ==============================================
-    // โค้ดควบคุมหน้าต่างลอยคู่มือ (Drag, Open, Close)
-    // ==============================================
     function openManual() {
         document.getElementById('floatingManual').style.display = 'flex';
         document.body.classList.add('manual-open'); 
