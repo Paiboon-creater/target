@@ -206,10 +206,10 @@
             border-radius: 10px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(6, 182, 212, 0.3);
             z-index: 9999;
+            display: none;
             flex-direction: column;
             overflow: hidden;
             resize: both;
-            display: none; 
             transition: opacity 0.3s ease;
         }
         
@@ -376,8 +376,8 @@
         <div class="manual-section-title" style="color: #38bdf8; border-color: #0ea5e9;">📝 การเพิ่มข้อมูลเป้าหมายใหม่</div>
         <ol>
             <li>ที่ช่อง <strong>รหัสชิ้นงาน</strong> ให้เลือกชิ้นงานที่ต้องการ (พิมพ์ค้นหาได้)</li>
-            <li>ที่ช่อง <strong>ขั้นตอนการทำงาน</strong> ให้เลือกขั้นตอนการผลิต กรณีไม่พบ ขั้นตอนที่ต้องการกรุณาติดต่อผู้สร้างระบบฐานข้อมูล</li>
-            <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย(ชิ้น/ต่อคน/ต่อชม.)</li>
+            <li>ที่ช่อง <strong>ขั้นตอนการทำงาน</strong> ให้เลือกขั้นตอนการผลิต (พิมพ์ค้นหาได้) กรณีไม่พบขั้นตอนที่ต้องการ กรุณาติดต่อผู้สร้างระบบฐานข้อมูล</li>
+            <li>ที่ช่อง <strong>จำนวนเป้าหมาย</strong> ให้กรอกตัวเลขยอดผลิตเป้าหมาย (ชิ้น/ต่อคน/ต่อชม.)</li>
             <li>กดปุ่ม <strong style="color: #22d3ee;">[+] บันทึกข้อมูล (SAVE)</strong></li>
         </ol>
 
@@ -426,8 +426,8 @@
     let refSteps = {};
     let tableData = []; 
     
-    // ตัวแปรสำหรับเก็บ Instance ของ Tom Select
-    let tsIdWork, tsFilterWork;
+    // ตัวแปรสำหรับเก็บ Instance ของ Tom Select ทั้ง 3 ช่อง
+    let tsIdWork, tsFilterWork, tsIdStep;
 
     window.onload = async function() {
         if(window.innerWidth > 1024) {
@@ -469,8 +469,10 @@
                 selectStep.innerHTML += `<option value="${s.id_step}">${s.step_name}</option>`;
             });
 
+            // สร้าง Smart Dropdown (Tom Select) ทั้ง 3 ช่อง
             tsIdWork = new TomSelect('#id_work', { create: false, sortField: false });
             tsFilterWork = new TomSelect('#filter_work', { create: false, sortField: false });
+            tsIdStep = new TomSelect('#id_step', { create: false, sortField: false });
 
             let savedFilterWork = localStorage.getItem('target_filter_work');
             if (savedFilterWork && (refWorks[savedFilterWork] || savedFilterWork === 'all')) {
@@ -553,6 +555,7 @@
             
             document.getElementById('targetForm').reset();
             tsIdWork.setValue('', true); 
+            tsIdStep.setValue('', true); // เคลียร์ค่า Smart Dropdown ขั้นตอน
 
             tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
@@ -624,7 +627,6 @@
         });
     }
 
-    // ฟังก์ชันคัดลอกและเพิ่มเติมข้อมูลเฉพาะส่วนที่แตกต่าง
     async function copyTargets() {
         const sourceWorkId = document.getElementById('filter_work').value;
         
@@ -663,7 +665,6 @@
                 Swal.fire({ title: 'กำลังตรวจสอบข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 
                 try {
-                    // 1. ดึงข้อมูลขั้นตอนของชิ้นงานต้นทาง
                     const resSource = await fetch(`${BASE_URL}/targets?id_work=eq.${sourceWorkId}`, { headers });
                     const sourceData = await resSource.json();
 
@@ -672,14 +673,10 @@
                         return;
                     }
 
-                    // 2. ดึงข้อมูลที่ชิ้นงานปลายทางมีอยู่แล้ว
                     const resDest = await fetch(`${BASE_URL}/targets?id_work=eq.${destWorkId}&select=id_step`, { headers });
                     const destData = await resDest.json();
                     
-                    // สร้าง Array เก็บเฉพาะ ID ของขั้นตอนที่มีในปลายทางแล้ว
                     const destStepIds = destData.map(item => item.id_step);
-
-                    // 3. กรองข้อมูลเอาเฉพาะ "ขั้นตอนที่ยังไม่มีในปลายทาง" (ส่วนที่แตกต่าง)
                     const newStepsToInsert = sourceData.filter(item => !destStepIds.includes(item.id_step));
 
                     if (newStepsToInsert.length === 0) {
@@ -694,7 +691,6 @@
 
                     Swal.fire({ title: `กำลังเพิ่ม ${newStepsToInsert.length} รายการใหม่...`, background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-                    // 4. เตรียมข้อมูลเฉพาะตัวใหม่ส่งไปเซฟ
                     const payload = newStepsToInsert.map(item => ({
                         id_work: parseInt(destWorkId),
                         id_step: item.id_step,
@@ -711,7 +707,6 @@
 
                     Swal.fire({icon: 'success', title: 'เพิ่มข้อมูลสำเร็จ!', text: `เพิ่มเติมขั้นตอนใหม่ไปทั้งหมด ${newStepsToInsert.length} รายการ`, timer: 2000, showConfirmButton: false, background: '#082f49', color: '#22d3ee'});
                     
-                    // สลับไปดูงานที่เพิ่งคัดลอกใส่ทันที
                     tsFilterWork.setValue(destWorkId, true);
                     tsIdWork.setValue(destWorkId, true);
                     localStorage.setItem('target_filter_work', destWorkId);
@@ -747,198 +742,152 @@
     function triggerEdit(id_target, id_work, id_step, target_amount) {
         document.getElementById('edit_id_target').value = id_target;
         tsIdWork.setValue(id_work, true); 
-        
+        tsIdStep.setValue(id_step, true); // แสดงขั้นตอนการทำงานใน Smart Dropdown
+        document.getElementById('target_amount').value = target_amount;
+
+        const btnSave = document.getElementById('btnSave');
+        btnSave.innerText = '[*] บันทึกการแก้ไข (UPDATE)';
+        btnSave.classList.remove('btn-cyan');
+        btnSave.classList.add('btn-warning');
+
+        document.getElementById('btnCancelEdit').style.display = 'block';
+
         if (id_work) {
             tsFilterWork.setValue(id_work, true);
             localStorage.setItem('target_filter_work', id_work);
             loadTableData();
         }
-        
-        document.getElementById('id_step').value = id_step;
-        document.getElementById('target_amount').value = target_amount;
-        
-        document.getElementById('btnSave').innerText = '[*] บันทึกการแก้ไข (UPDATE)';
-        document.getElementById('btnSave').classList.replace('btn-cyan', 'btn-warning');
-        document.getElementById('btnCancelEdit').style.display = 'block';
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function cancelEdit() {
-        document.getElementById('targetForm').reset();
         document.getElementById('edit_id_target').value = '';
-        tsIdWork.setValue('', true); 
-        
-        document.getElementById('btnSave').innerText = '[+] บันทึกข้อมูล (SAVE)';
-        document.getElementById('btnSave').classList.replace('btn-warning', 'btn-cyan');
+        document.getElementById('targetForm').reset();
+        tsIdWork.setValue('', true);
+        tsIdStep.setValue('', true); // ล้างค่า Smart Dropdown ขั้นตอน
+
+        const btnSave = document.getElementById('btnSave');
+        btnSave.innerText = '[+] บันทึกข้อมูล (SAVE)';
+        btnSave.classList.remove('btn-warning');
+        btnSave.classList.add('btn-cyan');
+
         document.getElementById('btnCancelEdit').style.display = 'none';
-        
-        let savedFilterWork = localStorage.getItem('target_filter_work');
-        if (savedFilterWork && savedFilterWork !== 'all') {
-            tsIdWork.setValue(savedFilterWork, true);
-        }
     }
 
-   async function deleteRecord(id_target) {
-        const confirmDelete = await Swal.fire({
-            title: 'ยืนยันการลบ?',
-            text: "ข้อมูล Target ID #" + id_target + " จะถูกลบออกจากระบบอย่างถาวร!",
+    async function deleteRecord(id_target) {
+        const confirmRes = await Swal.fire({
+            title: 'ยืนยันการลบข้อมูล?',
+            text: `คุณต้องการลบข้อมูล ID Target #${id_target} ใช่หรือไม่?`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'ลบทิ้ง',
+            confirmButtonText: 'ลบข้อมูล',
             cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#ef4444',
-            background: '#041421', color: '#7dd3fc'
+            background: '#041421',
+            color: '#7dd3fc',
+            customClass: { confirmButton: 'btn btn-danger', cancelButton: 'btn btn-secondary' }
         });
 
-        if (confirmDelete.isConfirmed) {
+        if (confirmRes.isConfirmed) {
             try {
                 const res = await fetch(`${BASE_URL}/targets?id_target=eq.${id_target}`, {
-                    method: 'DELETE', headers: headers
+                    method: 'DELETE',
+                    headers: headers
                 });
-                
-                if (res.ok) {
-                    Swal.fire({icon: 'success', title: 'ลบข้อมูลสำเร็จ', timer: 1500, showConfirmButton: false, background: '#041421', color: '#7dd3fc'});
-                    await loadTableData();
-                } else {
-                    const errData = await res.json().catch(() => ({}));
-                    if (res.status === 409) {
-                        Swal.fire({
-                            icon: 'error', 
-                            title: 'ลบข้อมูลไม่ได้!', 
-                            text: 'เป้าหมายนี้มีการบันทึกยอดผลิตไปแล้ว (ติดประวัติการทำงาน) กรุณาลบประวัติในหน้าบันทึกการผลิตก่อนครับ', 
-                            background: '#041421', 
-                            color: '#fb7185'
-                        });
-                    } else {
-                        throw new Error(errData.message || 'Delete Failed');
-                    }
-                }
-            } catch (e) {
+
+                if (!res.ok) throw new Error('ลบข้อมูลไม่สำเร็จ');
+
                 Swal.fire({
-                    icon: 'error', 
-                    title: 'ข้อผิดพลาด', 
-                    text: 'ลบข้อมูลไม่สำเร็จ: ' + e.message, 
-                    background: '#041421', 
-                    color: '#fb7185'
+                    icon: 'success',
+                    title: 'ลบข้อมูลสำเร็จ',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: '#082f49',
+                    color: '#22d3ee'
+                });
+
+                await loadTableData();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'เกิดข้อผิดพลาดในการลบข้อมูล',
+                    background: '#082f49',
+                    color: 'white'
                 });
             }
         }
     }
 
     function openManual() {
-        document.getElementById('floatingManual').style.display = 'flex';
-        document.body.classList.add('manual-open'); 
+        const manual = document.getElementById('floatingManual');
+        manual.style.display = 'flex';
+        document.body.classList.add('manual-open');
     }
 
     function closeManual() {
-        document.getElementById('floatingManual').style.display = 'none';
-        document.body.classList.remove('manual-open'); 
+        const manual = document.getElementById('floatingManual');
+        manual.style.display = 'none';
+        document.body.classList.remove('manual-open');
     }
 
-    dragElement(document.getElementById("floatingManual"));
+    function printManual() {
+        const printContent = document.getElementById('manualContent').innerHTML;
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>คู่มือการใช้งาน TARGET PROJECT</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; line-height: 1.6; color: #333; }
+                    .manual-section-title { font-weight: bold; margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; color: #0284c7; }
+                    ul, ol { padding-left: 20px; }
+                </style>
+            </head>
+            <body>
+                <h2>📖 คู่มือการใช้งาน TARGET PROJECT // STOCK TERMINAL</h2>
+                ${printContent}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    }
+
+    dragElement(document.getElementById('floatingManual'));
 
     function dragElement(elmnt) {
-        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        var header = document.getElementById(elmnt.id + "Header");
-        
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        const header = document.getElementById(elmnt.id + 'Header');
         if (header) {
             header.onmousedown = dragMouseDown;
-            header.ontouchstart = dragMouseDown;
-        } else {
-            elmnt.onmousedown = dragMouseDown;
-            elmnt.ontouchstart = dragMouseDown;
         }
 
         function dragMouseDown(e) {
             e = e || window.event;
-            if (e.type !== "touchstart") e.preventDefault();
-            
-            let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-            let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-            
-            pos3 = clientX;
-            pos4 = clientY;
-            
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
             document.onmouseup = closeDragElement;
             document.onmousemove = elementDrag;
-            document.ontouchend = closeDragElement;
-            document.ontouchmove = elementDrag;
         }
 
         function elementDrag(e) {
             e = e || window.event;
-            if (e.type !== "touchmove") e.preventDefault(); 
-            
-            let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-            let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-            
-            pos1 = pos3 - clientX;
-            pos2 = pos4 - clientY;
-            pos3 = clientX;
-            pos4 = clientY;
-            
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-            elmnt.style.right = 'auto'; 
         }
 
         function closeDragElement() {
             document.onmouseup = null;
             document.onmousemove = null;
-            document.ontouchend = null;
-            document.ontouchmove = null;
         }
-    }
-
-    function printManual() {
-        const manualHtml = document.getElementById('manualContent').innerHTML;
-        const printWindow = window.open('', '_blank', 'width=800,height=600');
-        
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>พิมพ์คู่มือ - TARGET STOCK TERMINAL</title>
-                <style>
-                    body { 
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                        color: #000; 
-                        padding: 30px; 
-                        line-height: 1.6; 
-                    }
-                    h2 { text-align: center; font-size: 24px; margin-bottom: 20px; }
-                    .manual-section-title { 
-                        font-size: 18px; 
-                        font-weight: bold; 
-                        margin-top: 25px; 
-                        margin-bottom: 10px; 
-                        border-bottom: 2px solid #ccc; 
-                        padding-bottom: 5px; 
-                        color: #000 !important;
-                    }
-                    ul, ol { padding-left: 25px; margin-top: 5px; }
-                    li { margin-bottom: 10px; font-size: 15px; }
-                    strong { color: #000 !important; }
-                    span { color: #000 !important; background: transparent !important; padding: 0 !important; font-weight: bold; }
-                    @media print {
-                        body { padding: 0; }
-                    }
-                </style>
-            </head>
-            <body>
-                <h2>📖 คู่มือการใช้งาน TARGET // STOCK TERMINAL</h2>
-                ${manualHtml}
-            </body>
-            </html>
-        `);
-        
-        printWindow.document.close();
-        printWindow.focus();
-        
-        setTimeout(() => {
-            printWindow.print();
-            printWindow.close();
-        }, 300);
     }
 </script>
 </body>
